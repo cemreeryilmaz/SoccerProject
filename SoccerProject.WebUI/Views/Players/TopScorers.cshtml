@@ -1,0 +1,166 @@
+@model List<TopScorerDto>
+@{
+    Layout = null;
+    ViewData["Title"] = "Gol Krallığı";
+    var top3 = Model.Take(3).ToList();
+    var rest = Model.Skip(3).ToList();
+    var maxGoals = Model.Any() ? Model.Max(x => x.Goals) : 0;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <style>
+        :root {
+            --bg:#070F1F; --surface:#0F1D38; --surface-2:#142647; --line:#1F3358;
+            --text:#E9F0FB; --text-2:#C4D0E6; --muted:#8B9CC0; --dim:#6A7DA3;
+            --blue:#2E7BFF; --blue-bright:#5B9BFF; --green:#1FC98A; --amber:#F2B53B; --red:#F2475C;
+            --gold:#F5C542; --silver:#C8D2E0; --bronze:#D08A4E;
+            --radius-lg:20px; --radius-md:14px; --radius-sm:10px;
+            --font-display:"Barlow Condensed","Arial Narrow",sans-serif;
+            --font-body:"Barlow","Segoe UI",system-ui,sans-serif;
+        }
+        body.scorers-page { min-height:100vh; margin:0; background-color:var(--bg);
+            background-image:radial-gradient(1100px 480px at 12% -8%, rgba(245,197,66,.14), transparent 62%),
+                             radial-gradient(900px 420px at 90% 0%, rgba(46,123,255,.14), transparent 60%);
+            background-repeat:no-repeat; color:var(--text); font-family:var(--font-body); }
+        a { text-decoration:none; color:inherit; }
+        .shell { padding-block:32px 72px; }
+        .top-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+        .top-bar a { padding:8px 14px; border:1px solid var(--line); border-radius:999px; color:var(--text-2); font-size:.85rem; font-weight:600; }
+        .top-bar a:hover, .top-bar a.is-active { border-color:var(--amber); color:#fff; }
+        .hero { position:relative; overflow:hidden; padding:30px 32px; border:1px solid var(--line); border-radius:var(--radius-lg); background:linear-gradient(160deg,#3a2f0b 0%,#15213e 55%,#09142A 100%); margin-bottom:24px; }
+        .hero::after { content:""; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,var(--gold),var(--amber) 30%,transparent 75%); }
+        .hero-league { display:flex; align-items:center; gap:10px; margin-bottom:8px; color:var(--muted); font-weight:500; }
+        .league-mark { display:grid; place-items:center; width:30px; height:30px; border-radius:9px; background:linear-gradient(145deg,var(--gold),var(--amber)); color:#2a1f00; font-family:var(--font-display); font-weight:700; }
+        .hero h1 { margin:0; font-family:var(--font-display); font-size:clamp(2.4rem,5vw,3.6rem); font-weight:700; line-height:.95; }
+        .hero p { max-width:62ch; margin:10px 0 0; color:var(--muted); }
+
+        /* Podyum */
+        .podium { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:26px; }
+        .pod { position:relative; display:flex; flex-direction:column; align-items:center; text-align:center; padding:22px 16px 18px; border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--surface); transition:transform .15s ease, border-color .15s ease; }
+        .pod:hover { transform:translateY(-4px); }
+        .pod.r1 { border-color:rgba(245,197,66,.55); background:linear-gradient(180deg,rgba(245,197,66,.10),var(--surface) 60%); }
+        .pod.r2 { border-color:rgba(200,210,224,.45); }
+        .pod.r3 { border-color:rgba(208,138,78,.45); }
+        .pod .medal { position:absolute; top:12px; left:14px; font-family:var(--font-display); font-size:1.1rem; font-weight:700; }
+        .pod.r1 .medal { color:var(--gold); } .pod.r2 .medal { color:var(--silver); } .pod.r3 .medal { color:var(--bronze); }
+        .pod .avatar { width:84px; height:84px; border-radius:50%; overflow:hidden; background:var(--surface-2); box-shadow:inset 0 0 0 2px var(--line); margin-bottom:12px; }
+        .pod.r1 .avatar { width:98px; height:98px; box-shadow:inset 0 0 0 2px var(--gold), 0 0 24px rgba(245,197,66,.25); }
+        .pod .avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+        .pod .name { font-family:var(--font-display); font-size:1.35rem; font-weight:700; line-height:1; }
+        .pod .team { display:inline-flex; align-items:center; gap:7px; margin-top:7px; color:var(--muted); font-size:.85rem; }
+        .crest { --size:22px; flex:none; display:inline-grid; place-items:center; width:var(--size); height:var(--size);
+            border-radius:50%; background:linear-gradient(180deg,var(--crest-a) 0 70%,var(--crest-b) 70% 100%); color:var(--crest-ink,#fff);
+            font-family:var(--font-display); font-size:calc(var(--size)*.38); font-weight:700; box-shadow:inset 0 0 0 1.2px rgba(255,255,255,.16); }
+        .pod .goals { margin-top:12px; font-family:var(--font-display); font-weight:700; }
+        .pod .goals b { font-size:2.1rem; color:var(--amber); }
+        .pod .goals span { color:var(--muted); font-size:.85rem; }
+
+        /* Tablo */
+        .board { border:1px solid var(--line); border-radius:var(--radius-lg); overflow:hidden; background:var(--surface); }
+        .board-head, .board-row { display:grid; grid-template-columns:56px 1fr 180px 92px 120px; align-items:center; gap:12px; padding:12px 18px; }
+        .board-head { color:var(--dim); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; border-bottom:1px solid var(--line); background:var(--surface-2); }
+        .board-row { border-bottom:1px solid rgba(31,51,88,.5); transition:background .15s ease; }
+        .board-row:last-child { border-bottom:0; }
+        .board-row:hover { background:var(--surface-2); }
+        .rk { font-family:var(--font-display); font-size:1.25rem; font-weight:700; color:var(--muted); text-align:center; }
+        .player { display:flex; align-items:center; gap:12px; min-width:0; }
+        .player .avatar-sm { flex:none; width:40px; height:40px; border-radius:50%; overflow:hidden; background:var(--surface-2); box-shadow:inset 0 0 0 1.5px var(--line); }
+        .player .avatar-sm img { width:100%; height:100%; object-fit:cover; display:block; }
+        .player .pn { font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .player .pp { color:var(--dim); font-size:.78rem; }
+        .team-cell { display:flex; align-items:center; gap:8px; color:var(--text-2); font-size:.9rem; }
+        .pos-cell { color:var(--muted); font-size:.85rem; }
+        .goals-cell { display:flex; align-items:center; gap:10px; }
+        .goals-cell b { font-family:var(--font-display); font-size:1.3rem; min-width:26px; text-align:right; }
+        .bar { flex:1; height:6px; border-radius:999px; background:var(--surface-2); overflow:hidden; }
+        .bar i { display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--amber),var(--gold)); }
+        @@media (max-width:860px){ .board-head, .board-row { grid-template-columns:44px 1fr 92px; } .team-cell, .pos-cell { display:none; } }
+    </style>
+</head>
+<body class="scorers-page">
+    <main class="shell container-xl">
+        <div class="top-bar">
+            <a href="/Fixture">Fikstür</a>
+            <a href="/Standing">Puan Durumu</a>
+            <a href="/Players">Futbolcular</a>
+            <a href="/Players/TopScorers" class="is-active">Gol Krallığı</a>
+            <a href="/Stadiums">Stadyumlar</a>
+            <a href="/Match">Maç Sonuçları</a>
+        </div>
+
+        <header class="hero">
+            <div class="hero-league"><span class="league-mark" aria-hidden="true">⚽</span>İtalya, Serie A · 2026/27</div>
+            <h1>Gol Krallığı</h1>
+            <p>Oynanan maçlarda futbolcuların attığı gollerin toplamı. İlk 20 haftanın verilerine göre güncellenir. Bir oyuncuya tıklayarak profilini görebilirsiniz.</p>
+        </header>
+
+        @if (!Model.Any())
+        {
+            <p style="color:var(--muted)">Henüz gol verisi yok.</p>
+        }
+        else
+        {
+            <!-- Podyum (ilk 3) -->
+            <div class="podium">
+                @{ var podClasses = new[] { "r1", "r2", "r3" }; }
+                @for (int i = 0; i < top3.Count; i++)
+                {
+                    var s = top3[i];
+                    <a class="pod @podClasses[i]" href="/Players/Detail/@s.PlayerId">
+                        <span class="medal">@s.Rank.</span>
+                        <span class="avatar">
+                            @if (!string.IsNullOrWhiteSpace(s.PhotoUrl))
+                            {
+                                <img src="@s.PhotoUrl" alt="@s.FullName" loading="lazy" referrerpolicy="no-referrer" />
+                            }
+                        </span>
+                        <span class="name">@s.FullName</span>
+                        <span class="team"><span class="crest" style="@TeamVisual.Style(s.TeamName)">@TeamVisual.Code(s.TeamName)</span>@s.TeamName</span>
+                        <span class="goals"><b>@s.Goals</b> <span>gol</span></span>
+                    </a>
+                }
+            </div>
+
+            <!-- Tam tablo -->
+            <div class="board">
+                <div class="board-head">
+                    <span style="text-align:center">#</span>
+                    <span>Futbolcu</span>
+                    <span>Takım</span>
+                    <span>Mevki</span>
+                    <span>Gol</span>
+                </div>
+                @foreach (var s in Model)
+                {
+                    <a class="board-row" href="/Players/Detail/@s.PlayerId">
+                        <span class="rk">@s.Rank</span>
+                        <span class="player">
+                            <span class="avatar-sm">
+                                @if (!string.IsNullOrWhiteSpace(s.PhotoUrl))
+                                {
+                                    <img src="@s.PhotoUrl" alt="@s.FullName" loading="lazy" referrerpolicy="no-referrer" />
+                                }
+                            </span>
+                            <span style="min-width:0">
+                                <span class="pn">@s.FullName</span>
+                            </span>
+                        </span>
+                        <span class="team-cell"><span class="crest" style="@TeamVisual.Style(s.TeamName)">@TeamVisual.Code(s.TeamName)</span>@s.TeamName</span>
+                        <span class="pos-cell">@s.Position</span>
+                        <span class="goals-cell">
+                            <b>@s.Goals</b>
+                            <span class="bar"><i style="width:@(maxGoals > 0 ? (int)(s.Goals * 100.0 / maxGoals) : 0)%"></i></span>
+                        </span>
+                    </a>
+                }
+            </div>
+        }
+    </main>
+</body>
+</html>

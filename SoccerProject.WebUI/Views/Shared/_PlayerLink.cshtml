@@ -1,0 +1,9 @@
+@model SoccerProject.WebUI.DTOs.MatchEventDtos.MatchEventDto
+@if (Model.PlayerId != null && Model.PlayerId > 0)
+{
+    <a class="player-link" href="/Players/Detail/@Model.PlayerId">@Model.PlayerName</a>
+}
+else
+{
+    @Model.PlayerName
+}

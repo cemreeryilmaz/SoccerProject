@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Serie A Puan Durumu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+  <style>
+/* =============================================================
+   Serie A Puan Durumu - standings.css
+   1  Tokens        6  Toolbar (filtre + arama)
+   2  Base          7  Puan tablosu
+   3  Hero          8  Form rozetleri
+   4  Puan dağılımı 9  Yan panel
+   5  Özet kartları 10 Responsive + erişilebilirlik
+   ============================================================= */
+
+/* 1. Tokens ---------------------------------------------------- */
+:root {
+  --bg: #070F1F;
+  --bg-2: #0B1730;
+  --surface: #0F1D38;
+  --surface-2: #142647;
+  --line: #1F3358;
+  --line-soft: rgba(31, 51, 88, .6);
+
+  --text: #E9F0FB;
+  --text-2: #C4D0E6;
+  --muted: #8B9CC0;
+  --dim: #6A7DA3;
+
+  --blue: #2E7BFF;
+  --blue-bright: #5B9BFF;
+  --blue-soft: rgba(46, 123, 255, .14);
+  --green: #1FC98A;
+  --amber: #F2B53B;
+  --red: #F2475C;
+  --draw: #6B7A98;
+
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+}
+
+/* 2. Base ------------------------------------------------------ */
+body.standings-page {
+  min-height: 100vh;
+  margin: 0;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1100px 480px at 12% -8%, rgba(46, 123, 255, .20), transparent 62%),
+    radial-gradient(800px 380px at 100% 0%, rgba(46, 123, 255, .08), transparent 60%);
+  background-repeat: no-repeat;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+.standings-shell { padding-block: 32px 72px; }
+
+/* Takım arması (logo yer tutucu) - gerçek projede <img class="team-crest"> ile değiştirilebilir */
+.team-crest {
+  --size: 32px;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--crest-a) 0 70%, var(--crest-b) 70% 100%);
+  color: var(--crest-ink, #fff);
+  font-family: var(--font-display);
+  font-size: calc(var(--size) * .34);
+  font-weight: 700;
+  line-height: 1;
+  padding-bottom: calc(var(--size) * .12);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .16);
+}
+.team-crest--sm { --size: 28px; }
+img.team-crest { object-fit: contain; background: none; padding: 0; box-shadow: none; }
+
+/* 3. Hero ------------------------------------------------------ */
+.standings-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 30px 32px 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, #112552 0%, #0B1834 55%, #09142A 100%);
+}
+/* çim biçme şeritleri */
+.standings-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .022) 0 72px, transparent 72px 144px);
+  pointer-events: none;
+}
+.standings-hero::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--blue-bright) 30%, transparent 75%);
+}
+.standings-hero > * { position: relative; }
+
+.hero-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.hero-league {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.league-mark {
+  display: grid;
+  place-items: center;
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(145deg, var(--blue-bright), var(--blue));
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: .95rem;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(46, 123, 255, .35);
+}
+.hero-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5.2vw, 4rem);
+  font-weight: 700;
+  line-height: .95;
+  letter-spacing: -.005em;
+}
+.hero-subtitle {
+  max-width: 54ch;
+  margin: 12px 0 0;
+  color: var(--muted);
+}
+.hero-meta {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+}
+.hero-meta > div {
+  min-width: 100px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, .035);
+}
+.hero-meta dt { color: var(--muted); font-size: .8rem; font-weight: 500; }
+.hero-meta dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+/* 4. Puan dağılımı (hero içi mini görselleştirme) ------------- */
+.points-ladder {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, .06);
+}
+.ladder-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 6px;
+}
+.ladder-title { margin: 0; font-size: 1rem; font-weight: 600; }
+.ladder-hint { margin: 0; color: var(--dim); font-size: .85rem; }
+
+.ladder-scroll { overflow-x: auto; padding: 0 4px 4px; }
+.ladder-track {
+  position: relative;
+  min-width: 680px;
+  height: 116px;
+  margin: 0 18px;
+}
+.ladder-axis {
+  position: absolute;
+  left: 0; right: 0; bottom: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(242, 71, 92, .5), var(--line) 30%, var(--line) 70%, rgba(46, 123, 255, .65));
+}
+.ladder-tick {
+  position: absolute;
+  bottom: 0;
+  left: var(--x);
+  transform: translateX(-50%);
+  color: var(--dim);
+  font-size: .75rem;
+  white-space: nowrap;
+}
+.ladder-tick::before {
+  content: "";
+  position: absolute;
+  bottom: 20px; left: 50%;
+  width: 1px; height: 8px;
+  background: var(--line);
+}
+.ladder-marker {
+  --ring: var(--line);
+  position: absolute;
+  left: var(--x);
+  bottom: calc(36px + var(--stack) * 34px);
+  transform: translateX(-50%);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  animation: marker-in .55s cubic-bezier(.2, .8, .2, 1) both;
+  animation-delay: calc(var(--i) * 35ms);
+}
+.ladder-marker .team-crest {
+  box-shadow: 0 0 0 2px #0B1834, 0 0 0 3.5px var(--ring);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.ladder-marker.zone-ucl    { --ring: var(--blue); }
+.ladder-marker.zone-europe { --ring: var(--green); }
+.ladder-marker.zone-rel    { --ring: var(--red); }
+.ladder-marker:hover .team-crest,
+.ladder-marker.is-hover .team-crest { transform: translateY(-4px); }
+.ladder-marker.is-active .team-crest {
+  transform: translateY(-4px) scale(1.12);
+  box-shadow: 0 0 0 2px #0B1834, 0 0 0 4px var(--blue-bright), 0 8px 20px rgba(46, 123, 255, .5);
+}
+.ladder-marker:focus-visible { outline: none; }
+.ladder-marker:focus-visible .team-crest { box-shadow: 0 0 0 2px #0B1834, 0 0 0 4px #fff; }
+
+@keyframes marker-in {
+  from { opacity: 0; translate: 0 12px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+/* 5. Özet kartları -------------------------------------------- */
+.summary-section { margin-top: 20px; }
+
+.stat-card {
+  --accent: var(--blue-bright);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  height: 100%;
+  padding: 18px 18px 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 18px; bottom: 18px; left: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+}
+.stat-card--leader  { --accent: var(--blue-bright); }
+.stat-card--attack  { --accent: var(--green); }
+.stat-card--defence { --accent: var(--amber); }
+.stat-card--danger  { --accent: var(--red); }
+
+.stat-card__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+.stat-card__icon svg { width: 22px; height: 22px; }
+.stat-card__body { flex: 1; min-width: 0; }
+.stat-card__label { margin: 0; color: var(--muted); font-size: .85rem; }
+.stat-card__team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 4px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.stat-card__note { margin: 0; color: var(--dim); font-size: .8rem; }
+.stat-card__value {
+  flex: none;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.stat-card__value small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: .72rem;
+  font-weight: 500;
+}
+
+/* 6. Toolbar --------------------------------------------------- */
+.standings-body { margin-top: 20px; }
+
+.table-panel {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.table-toolbar__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.table-toolbar__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.zone-filter { display: flex; flex-wrap: wrap; gap: 6px; }
+.zone-chip {
+  --dot: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.zone-chip::before {
+  content: "";
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--dot);
+}
+.zone-chip--all::before { display: none; }
+.zone-chip--ucl    { --dot: var(--blue); }
+.zone-chip--europe { --dot: var(--green); }
+.zone-chip--rel    { --dot: var(--red); }
+.zone-chip:hover { color: var(--text); border-color: #2C4675; }
+.zone-chip[aria-pressed="true"] {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--text);
+}
+
+.team-search { position: relative; }
+.team-search svg {
+  position: absolute;
+  top: 50%; left: 11px;
+  width: 16px; height: 16px;
+  transform: translateY(-50%);
+  color: var(--dim);
+  pointer-events: none;
+}
+.team-search input {
+  width: 190px;
+  padding: 7px 12px 7px 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  color: var(--text);
+  font: inherit;
+  font-size: .9rem;
+}
+.team-search input::placeholder { color: var(--dim); }
+.team-search input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+
+.zone-chip:focus-visible,
+.standings-row:focus-visible {
+  outline: 2px solid var(--blue-bright);
+  outline-offset: -2px;
+}
+
+/* 7. Puan tablosu --------------------------------------------- */
+.standings-table-wrap { overflow-x: auto; }
+
+.standings-table {
+  width: 100%;
+  min-width: 780px;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.standings-table thead th {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--dim);
+  font-size: .8rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+.standings-table abbr { text-decoration: none; cursor: help; }
+
+.standings-table tbody th,
+.standings-table tbody td {
+  padding: 13px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text-2);
+  font-size: .95rem;
+  font-weight: 400;
+  text-align: center;
+  vertical-align: middle;
+  transition: background-color .15s ease;
+}
+.standings-table tbody tr:last-child > * { border-bottom: 0; }
+
+.standings-table .col-pos {
+  position: relative;
+  width: 58px;
+  padding-left: 18px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.standings-table thead .col-pos { font-family: var(--font-body); font-size: .8rem; color: var(--dim); }
+.standings-table .col-team { min-width: 210px; text-align: left; }
+.standings-table .col-num  { width: 52px; }
+.standings-table .col-gd   { width: 60px; }
+.standings-table .col-pts  { width: 76px; }
+.standings-table .col-form { width: 180px; }
+
+/* bölge çizgisi + hafif ton */
+.standings-row { --zone: transparent; --tint: transparent; cursor: pointer; }
+.standings-row .col-pos::before {
+  content: "";
+  position: absolute;
+  top: 9px; bottom: 9px; left: 0;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: var(--zone);
+}
+.standings-row.zone-ucl    { --zone: var(--blue);  --tint: rgba(46, 123, 255, .10); }
+.standings-row.zone-europe { --zone: var(--green); --tint: rgba(31, 201, 138, .08); }
+.standings-row.zone-rel    { --zone: var(--red);   --tint: rgba(242, 71, 92, .10); }
+.standings-row > .col-pos  { background-image: linear-gradient(var(--tint), var(--tint)); }
+.standings-row > .col-team { background-image: linear-gradient(90deg, var(--tint), transparent 85%); }
+
+/* bölge sınırı */
+.standings-row.edge-ucl    { --edge: rgba(46, 123, 255, .6); }
+.standings-row.edge-europe { --edge: rgba(31, 201, 138, .55); }
+.standings-row.edge-rel    { --edge: rgba(242, 71, 92, .6); }
+.standings-table tbody .standings-row[class*="edge-"] > * { border-bottom: 1px dashed var(--edge); }
+
+.team-cell { display: flex; align-items: center; gap: 12px; }
+.team-name { color: var(--text); font-size: 1rem; font-weight: 600; }
+
+.gd { font-weight: 600; }
+.gd.is-pos  { color: var(--green); }
+.gd.is-neg  { color: var(--red); }
+.gd.is-zero { color: var(--muted); }
+
+.standings-table thead .col-pts { color: var(--blue-bright); }
+.standings-table tbody .col-pts {
+  background-color: rgba(46, 123, 255, .10);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* hover + seçim */
+.standings-row:hover > *,
+.standings-row.is-hover > * { background-color: rgba(91, 155, 255, .06); }
+.standings-table tbody .standings-row:hover > .col-pts,
+.standings-table tbody .standings-row.is-hover > .col-pts { background-color: rgba(46, 123, 255, .18); }
+
+.standings-row.is-selected > * { background-color: rgba(46, 123, 255, .16); }
+.standings-table tbody .standings-row.is-selected > .col-pts { background-color: var(--blue); }
+.standings-row.is-selected .col-pos::before { background: var(--blue-bright); box-shadow: 0 0 12px var(--blue); }
+
+.standings-table tbody .empty-row td {
+  padding: 36px 20px;
+  color: var(--muted);
+  text-align: center;
+}
+.empty-row strong { display: block; margin-bottom: 4px; color: var(--text); }
+
+.table-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+  color: var(--dim);
+  font-size: .82rem;
+}
+.table-foot strong { color: var(--text-2); font-weight: 600; }
+
+/* 8. Form rozetleri ------------------------------------------- */
+.form-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.form-badge {
+  --c: var(--draw);
+  display: grid;
+  place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--c);
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.form-badge--w { --c: var(--green); color: #032619; }
+.form-badge--d { --c: var(--draw); }
+.form-badge--l { --c: var(--red); }
+.form-list li:last-child .form-badge {
+  outline: 1.5px solid var(--c);
+  outline-offset: 2px;
+}
+
+/* 9. Yan panel ------------------------------------------------- */
+.side-stack {
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.side-card {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.side-card__title {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.side-card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.side-card p + p { margin-top: 8px; }
+
+.legend-list, .form-key, .form-leaders { margin: 0; padding: 0; list-style: none; }
+.legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+.legend-list li + li { border-top: 1px solid var(--line-soft); }
+.legend-swatch { flex: none; width: 4px; height: 30px; border-radius: 4px; background: var(--swatch); }
+.legend-list strong { display: block; color: var(--text); font-size: .95rem; font-weight: 600; line-height: 1.2; }
+.legend-list span { color: var(--dim); font-size: .8rem; }
+
+.form-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted);
+  font-size: .82rem;
+}
+.form-key li { display: flex; align-items: center; gap: 6px; }
+.form-key .form-badge { width: 20px; height: 20px; font-size: .62rem; }
+
+.form-leaders li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 9px 0;
+}
+.form-leaders li + li { border-top: 1px solid var(--line-soft); }
+.form-leaders .team-name { font-size: .95rem; }
+.form-leaders__pts { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; }
+.form-leaders__pts small { color: var(--dim); font-family: var(--font-body); font-size: .72rem; font-weight: 500; }
+.form-meter {
+  grid-column: 2 / 4;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--bg-2);
+  overflow: hidden;
+}
+.form-meter span {
+  display: block;
+  width: var(--w);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--blue), var(--green));
+}
+
+.note-card { background: linear-gradient(180deg, var(--surface-2), var(--surface)); }
+
+/* 10. Responsive + erişilebilirlik ---------------------------- */
+@media (max-width: 1199.98px) {
+  .side-stack {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+}
+@media (max-width: 767.98px) {
+  .standings-shell { padding-block: 16px 48px; }
+  .standings-hero { padding: 22px 18px 16px; }
+  .hero-meta { width: 100%; }
+  .hero-meta > div { flex: 1; min-width: 0; }
+  .table-toolbar { padding: 14px 16px; }
+  .table-toolbar__controls, .team-search, .team-search input { width: 100%; }
+  .standings-table { min-width: 560px; }
+  .standings-table .col-team { min-width: 150px; }
+  .hero-meta > div { padding: 10px 12px; }
+  .standings-table .col-hide-sm { display: none; }
+  .standings-table .col-form { width: 140px; }
+  .form-badge { width: 20px; height: 20px; font-size: .62rem; }
+  .form-list { gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+  </style>
+</head>
+<body class="standings-page">
+  <main class="standings-shell container-xl" data-standings>
+
+    <!-- ===== Partial: _StandingsHero ===== -->
+    <header class="standings-hero">
+      <div class="hero-top">
+        <div>
+          <div class="hero-league"><span class="league-mark" aria-hidden="true">SA</span>İtalya, Serie A</div>
+          <h1 class="hero-title">Serie A Puan Durumu</h1>
+          <p class="hero-subtitle">12. hafta sonunda güncel sıralama, gol dengesi ve son 5 maçlık form durumu.</p>
+        </div>
+        <dl class="hero-meta">
+          <div><dt>Sezon</dt><dd>2026/27</dd></div>
+          <div><dt>Hafta</dt><dd>12</dd></div>
+          <div><dt>Takım sayısı</dt><dd>20</dd></div>
+        </dl>
+      </div>
+
+      <!-- Partial: _PointsLadder -->
+      <section class="points-ladder" aria-labelledby="ladder-title">
+        <div class="ladder-head">
+          <h2 class="ladder-title" id="ladder-title">Puan dağılımı</h2>
+          <p class="ladder-hint">Tabloda görmek için bir takıma dokun</p>
+        </div>
+        <div class="ladder-scroll">
+          <div class="ladder-track">
+            <span class="ladder-axis" aria-hidden="true"></span>
+            <span class="ladder-tick" style="--x:4.17%">5</span><span class="ladder-tick" style="--x:25.00%">10</span><span class="ladder-tick" style="--x:45.83%">15</span><span class="ladder-tick" style="--x:66.67%">20</span><span class="ladder-tick" style="--x:87.50%">25</span>
+            <button type="button" class="ladder-marker zone-ucl" style="--x:95.83%;--stack:0;--i:19" data-ladder-team="inter" aria-pressed="false" aria-label="Inter, 1. sıra, 27 puan" title="Inter: 27 puan"><span class="team-crest team-crest--sm" style="--crest-a:#0A4FA8;--crest-b:#101418;--crest-ink:#fff" aria-hidden="true">INT</span></button><button type="button" class="ladder-marker zone-ucl" style="--x:91.67%;--stack:0;--i:18" data-ladder-team="napoli" aria-pressed="false" aria-label="Napoli, 2. sıra, 26 puan" title="Napoli: 26 puan"><span class="team-crest team-crest--sm" style="--crest-a:#1E9BD7;--crest-b:#0C3C78;--crest-ink:#fff" aria-hidden="true">NAP</span></button><button type="button" class="ladder-marker zone-ucl" style="--x:83.33%;--stack:0;--i:17" data-ladder-team="milan" aria-pressed="false" aria-label="Milan, 3. sıra, 24 puan" title="Milan: 24 puan"><span class="team-crest team-crest--sm" style="--crest-a:#C8141E;--crest-b:#111;--crest-ink:#fff" aria-hidden="true">MIL</span></button><button type="button" class="ladder-marker zone-ucl" style="--x:79.17%;--stack:0;--i:16" data-ladder-team="juventus" aria-pressed="false" aria-label="Juventus, 4. sıra, 23 puan" title="Juventus: 23 puan"><span class="team-crest team-crest--sm" style="--crest-a:#16181D;--crest-b:#E8E8E8;--crest-ink:#fff" aria-hidden="true">JUV</span></button><button type="button" class="ladder-marker zone-europe" style="--x:75.00%;--stack:0;--i:15" data-ladder-team="como" aria-pressed="false" aria-label="Como, 5. sıra, 22 puan" title="Como: 22 puan"><span class="team-crest team-crest--sm" style="--crest-a:#0B3E91;--crest-b:#fff;--crest-ink:#fff" aria-hidden="true">COM</span></button><button type="button" class="ladder-marker zone-europe" style="--x:70.83%;--stack:0;--i:14" data-ladder-team="roma" aria-pressed="false" aria-label="Roma, 6. sıra, 21 puan" title="Roma: 21 puan"><span class="team-crest team-crest--sm" style="--crest-a:#8E1F2F;--crest-b:#F0B323;--crest-ink:#fff" aria-hidden="true">ROM</span></button><button type="button" class="ladder-marker" style="--x:66.67%;--stack:0;--i:13" data-ladder-team="lazio" aria-pressed="false" aria-label="Lazio, 7. sıra, 20 puan" title="Lazio: 20 puan"><span class="team-crest team-crest--sm" style="--crest-a:#8FD3F4;--crest-b:#fff;--crest-ink:#0B2A4A" aria-hidden="true">LAZ</span></button><button type="button" class="ladder-marker" style="--x:62.50%;--stack:0;--i:12" data-ladder-team="atalanta" aria-pressed="false" aria-label="Atalanta, 8. sıra, 19 puan" title="Atalanta: 19 puan"><span class="team-crest team-crest--sm" style="--crest-a:#1E6FB8;--crest-b:#111;--crest-ink:#fff" aria-hidden="true">ATA</span></button><button type="button" class="ladder-marker" style="--x:62.50%;--stack:1;--i:11" data-ladder-team="fiorentina" aria-pressed="false" aria-label="Fiorentina, 9. sıra, 19 puan" title="Fiorentina: 19 puan"><span class="team-crest team-crest--sm" style="--crest-a:#5B2A86;--crest-b:#fff;--crest-ink:#fff" aria-hidden="true">FIO</span></button><button type="button" class="ladder-marker" style="--x:58.33%;--stack:0;--i:10" data-ladder-team="bologna" aria-pressed="false" aria-label="Bologna, 10. sıra, 18 puan" title="Bologna: 18 puan"><span class="team-crest team-crest--sm" style="--crest-a:#1A2F5A;--crest-b:#A21C26;--crest-ink:#fff" aria-hidden="true">BOL</span></button><button type="button" class="ladder-marker" style="--x:41.67%;--stack:0;--i:9" data-ladder-team="cagliari" aria-pressed="false" aria-label="Cagliari, 11. sıra, 14 puan" title="Cagliari: 14 puan"><span class="team-crest team-crest--sm" style="--crest-a:#A5162B;--crest-b:#0E2A56;--crest-ink:#fff" aria-hidden="true">CAG</span></button><button type="button" class="ladder-marker" style="--x:41.67%;--stack:1;--i:8" data-ladder-team="sassuolo" aria-pressed="false" aria-label="Sassuolo, 12. sıra, 14 puan" title="Sassuolo: 14 puan"><span class="team-crest team-crest--sm" style="--crest-a:#00A651;--crest-b:#111;--crest-ink:#fff" aria-hidden="true">SAS</span></button><button type="button" class="ladder-marker" style="--x:37.50%;--stack:0;--i:7" data-ladder-team="torino" aria-pressed="false" aria-label="Torino, 13. sıra, 13 puan" title="Torino: 13 puan"><span class="team-crest team-crest--sm" style="--crest-a:#7E1B1B;--crest-b:#E9D9B0;--crest-ink:#fff" aria-hidden="true">TOR</span></button><button type="button" class="ladder-marker" style="--x:37.50%;--stack:1;--i:6" data-ladder-team="udinese" aria-pressed="false" aria-label="Udinese, 14. sıra, 13 puan" title="Udinese: 13 puan"><span class="team-crest team-crest--sm" style="--crest-a:#26282C;--crest-b:#fff;--crest-ink:#fff" aria-hidden="true">UDI</span></button><button type="button" class="ladder-marker" style="--x:33.33%;--stack:0;--i:5" data-ladder-team="frosinone" aria-pressed="false" aria-label="Frosinone, 15. sıra, 12 puan" title="Frosinone: 12 puan"><span class="team-crest team-crest--sm" style="--crest-a:#1C4E9A;--crest-b:#FFD200;--crest-ink:#fff" aria-hidden="true">FRO</span></button><button type="button" class="ladder-marker" style="--x:29.17%;--stack:0;--i:4" data-ladder-team="lecce" aria-pressed="false" aria-label="Lecce, 16. sıra, 11 puan" title="Lecce: 11 puan"><span class="team-crest team-crest--sm" style="--crest-a:#F6D000;--crest-b:#D21F26;--crest-ink:#3A1206" aria-hidden="true">LEC</span></button><button type="button" class="ladder-marker" style="--x:25.00%;--stack:0;--i:3" data-ladder-team="parma" aria-pressed="false" aria-label="Parma, 17. sıra, 10 puan" title="Parma: 10 puan"><span class="team-crest team-crest--sm" style="--crest-a:#FFD200;--crest-b:#1D3E8A;--crest-ink:#10224A" aria-hidden="true">PAR</span></button><button type="button" class="ladder-marker zone-rel" style="--x:20.83%;--stack:0;--i:2" data-ladder-team="genoa" aria-pressed="false" aria-label="Genoa, 18. sıra, 9 puan" title="Genoa: 9 puan"><span class="team-crest team-crest--sm" style="--crest-a:#A2172E;--crest-b:#002B5C;--crest-ink:#fff" aria-hidden="true">GEN</span></button><button type="button" class="ladder-marker zone-rel" style="--x:16.67%;--stack:0;--i:1" data-ladder-team="monza" aria-pressed="false" aria-label="Monza, 19. sıra, 8 puan" title="Monza: 8 puan"><span class="team-crest team-crest--sm" style="--crest-a:#D2122E;--crest-b:#fff;--crest-ink:#fff" aria-hidden="true">MON</span></button><button type="button" class="ladder-marker zone-rel" style="--x:4.17%;--stack:0;--i:0" data-ladder-team="venezia" aria-pressed="false" aria-label="Venezia, 20. sıra, 5 puan" title="Venezia: 5 puan"><span class="team-crest team-crest--sm" style="--crest-a:#141414;--crest-b:#F06A1A;--crest-ink:#fff" aria-hidden="true">VEN</span></button>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <!-- ===== Partial: _SummaryCards ===== -->
+    <section class="summary-section" aria-label="Haftanın öne çıkanları">
+      <div class="row g-3">
+      <div class="col-sm-6 col-xl-3">
+        <!-- Partial: _StatCard -->
+        <article class="stat-card stat-card--leader">
+          <div class="stat-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M12 13v4M9 20h6"/></svg></div>
+          <div class="stat-card__body">
+            <p class="stat-card__label">Lider</p>
+            <p class="stat-card__team"><span class="team-crest team-crest--sm" style="--crest-a:#0A4FA8;--crest-b:#101418;--crest-ink:#fff" aria-hidden="true">INT</span>Inter</p>
+            <p class="stat-card__note">Napoli'nin 1 puan önünde</p>
+          </div>
+          <p class="stat-card__value">27<small>puan</small></p>
+        </article>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <!-- Partial: _StatCard -->
+        <article class="stat-card stat-card--attack">
+          <div class="stat-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.6l3.3 2.4-1.3 3.8h-4l-1.3-3.8z"/></svg></div>
+          <div class="stat-card__body">
+            <p class="stat-card__label">En çok gol atan</p>
+            <p class="stat-card__team"><span class="team-crest team-crest--sm" style="--crest-a:#0A4FA8;--crest-b:#101418;--crest-ink:#fff" aria-hidden="true">INT</span>Inter</p>
+            <p class="stat-card__note">Maç başına 2,17 gol</p>
+          </div>
+          <p class="stat-card__value">26<small>gol</small></p>
+        </article>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <!-- Partial: _StatCard -->
+        <article class="stat-card stat-card--defence">
+          <div class="stat-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg></div>
+          <div class="stat-card__body">
+            <p class="stat-card__label">En az gol yiyen</p>
+            <p class="stat-card__team"><span class="team-crest team-crest--sm" style="--crest-a:#16181D;--crest-b:#E8E8E8;--crest-ink:#fff" aria-hidden="true">JUV</span>Juventus</p>
+            <p class="stat-card__note">Maç başına 0,75 gol</p>
+          </div>
+          <p class="stat-card__value">9<small>gol</small></p>
+        </article>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <!-- Partial: _StatCard -->
+        <article class="stat-card stat-card--danger">
+          <div class="stat-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7l6 6 4-4 6 6M20 10v5h-5"/></svg></div>
+          <div class="stat-card__body">
+            <p class="stat-card__label">Düşme hattı başlangıcı</p>
+            <p class="stat-card__team"><span class="team-crest team-crest--sm" style="--crest-a:#A2172E;--crest-b:#002B5C;--crest-ink:#fff" aria-hidden="true">GEN</span>Genoa</p>
+            <p class="stat-card__note">9 puan, kurtuluşa 1 puan</p>
+          </div>
+          <p class="stat-card__value">18.<small>sıra</small></p>
+        </article>
+      </div>
+      </div>
+    </section>
+
+    <div class="standings-body">
+      <div class="row g-4">
+        <div class="col-xl-9">
+
+          <!-- ===== Partial: _StandingsTable ===== -->
+          <section class="table-panel" aria-labelledby="table-title">
+            <div class="table-toolbar">
+              <h2 class="table-toolbar__title" id="table-title">Genel sıralama</h2>
+              <div class="table-toolbar__controls">
+                <div class="zone-filter" role="group" aria-label="Bölgeye göre filtrele">
+                  <button type="button" class="zone-chip zone-chip--all" data-zone-filter="all" aria-pressed="true">Tümü</button>
+                  <button type="button" class="zone-chip zone-chip--ucl" data-zone-filter="ucl" aria-pressed="false">Şampiyonlar Ligi</button>
+                  <button type="button" class="zone-chip zone-chip--europe" data-zone-filter="europe" aria-pressed="false">Avrupa</button>
+                  <button type="button" class="zone-chip zone-chip--rel" data-zone-filter="rel" aria-pressed="false">Düşme hattı</button>
+                </div>
+                <label class="team-search">
+                  <span class="visually-hidden">Takım ara</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>
+                  <input type="search" placeholder="Takım ara" autocomplete="off" data-team-search>
+                </label>
+              </div>
+            </div>
+
+            <div class="standings-table-wrap">
+              <table class="standings-table">
+                <caption class="visually-hidden">Serie A 2026/27, 12. hafta puan durumu</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" class="col-pos">#</th>
+                    <th scope="col" class="col-team">Takım</th>
+                    <th scope="col" class="col-num"><abbr title="Oynanan maç">O</abbr></th>
+                    <th scope="col" class="col-num"><abbr title="Galibiyet">G</abbr></th>
+                    <th scope="col" class="col-num"><abbr title="Beraberlik">B</abbr></th>
+                    <th scope="col" class="col-num"><abbr title="Mağlubiyet">M</abbr></th>
+                    <th scope="col" class="col-num col-hide-sm"><abbr title="Atılan gol">AG</abbr></th>
+                    <th scope="col" class="col-num col-hide-sm"><abbr title="Yenilen gol">YG</abbr></th>
+                    <th scope="col" class="col-gd"><abbr title="Averaj">AV</abbr></th>
+                    <th scope="col" class="col-pts">Puan</th>
+                    <th scope="col" class="col-form">Son 5 maç</th>
+                  </tr>
+                </thead>
+                <tbody>
+            <!-- Razor: @foreach (var team in Model.Teams) { <partial name="_StandingsRow" model="team" /> } -->
+            <tr class="standings-row zone-ucl" data-team="inter" data-team-name="Inter" data-zone="ucl" tabindex="0">
+              <td class="col-pos">1</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#0A4FA8;--crest-b:#101418;--crest-ink:#fff" aria-hidden="true">INT</span><span class="team-name">Inter</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">8</td>
+              <td class="col-num">3</td>
+              <td class="col-num">1</td>
+              <td class="col-num col-hide-sm">26</td>
+              <td class="col-num col-hide-sm">10</td>
+              <td class="col-gd"><span class="gd is-pos">+16</span></td>
+              <td class="col-pts">27</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Galibiyet, Galibiyet, Beraberlik, Galibiyet, Galibiyet"><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li></ol></td>
+            </tr>
+            <tr class="standings-row zone-ucl" data-team="napoli" data-team-name="Napoli" data-zone="ucl" tabindex="0">
+              <td class="col-pos">2</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#1E9BD7;--crest-b:#0C3C78;--crest-ink:#fff" aria-hidden="true">NAP</span><span class="team-name">Napoli</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">8</td>
+              <td class="col-num">2</td>
+              <td class="col-num">2</td>
+              <td class="col-num col-hide-sm">21</td>
+              <td class="col-num col-hide-sm">10</td>
+              <td class="col-gd"><span class="gd is-pos">+11</span></td>
+              <td class="col-pts">26</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Galibiyet, Mağlubiyet, Galibiyet, Galibiyet, Beraberlik"><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li></ol></td>
+            </tr>
+            <tr class="standings-row zone-ucl" data-team="milan" data-team-name="Milan" data-zone="ucl" tabindex="0">
+              <td class="col-pos">3</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#C8141E;--crest-b:#111;--crest-ink:#fff" aria-hidden="true">MIL</span><span class="team-name">Milan</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">7</td>
+              <td class="col-num">3</td>
+              <td class="col-num">2</td>
+              <td class="col-num col-hide-sm">21</td>
+              <td class="col-num col-hide-sm">12</td>
+              <td class="col-gd"><span class="gd is-pos">+9</span></td>
+              <td class="col-pts">24</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Beraberlik, Galibiyet, Galibiyet, Mağlubiyet, Galibiyet"><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li></ol></td>
+            </tr>
+            <tr class="standings-row zone-ucl edge-ucl" data-team="juventus" data-team-name="Juventus" data-zone="ucl" tabindex="0">
+              <td class="col-pos">4</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#16181D;--crest-b:#E8E8E8;--crest-ink:#fff" aria-hidden="true">JUV</span><span class="team-name">Juventus</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">6</td>
+              <td class="col-num">5</td>
+              <td class="col-num">1</td>
+              <td class="col-num col-hide-sm">19</td>
+              <td class="col-num col-hide-sm">9</td>
+              <td class="col-gd"><span class="gd is-pos">+10</span></td>
+              <td class="col-pts">23</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Beraberlik, Galibiyet, Beraberlik, Galibiyet, Beraberlik"><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li></ol></td>
+            </tr>
+            <tr class="standings-row zone-europe" data-team="como" data-team-name="Como" data-zone="europe" tabindex="0">
+              <td class="col-pos">5</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#0B3E91;--crest-b:#fff;--crest-ink:#fff" aria-hidden="true">COM</span><span class="team-name">Como</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">6</td>
+              <td class="col-num">4</td>
+              <td class="col-num">2</td>
+              <td class="col-num col-hide-sm">18</td>
+              <td class="col-num col-hide-sm">12</td>
+              <td class="col-gd"><span class="gd is-pos">+6</span></td>
+              <td class="col-pts">22</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Galibiyet, Galibiyet, Beraberlik, Galibiyet, Mağlubiyet"><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li></ol></td>
+            </tr>
+            <tr class="standings-row zone-europe edge-europe" data-team="roma" data-team-name="Roma" data-zone="europe" tabindex="0">
+              <td class="col-pos">6</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#8E1F2F;--crest-b:#F0B323;--crest-ink:#fff" aria-hidden="true">ROM</span><span class="team-name">Roma</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">6</td>
+              <td class="col-num">3</td>
+              <td class="col-num">3</td>
+              <td class="col-num col-hide-sm">17</td>
+              <td class="col-num col-hide-sm">11</td>
+              <td class="col-gd"><span class="gd is-pos">+6</span></td>
+              <td class="col-pts">21</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Mağlubiyet, Galibiyet, Galibiyet, Beraberlik, Galibiyet"><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="lazio" data-team-name="Lazio" data-zone="mid" tabindex="0">
+              <td class="col-pos">7</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#8FD3F4;--crest-b:#fff;--crest-ink:#0B2A4A" aria-hidden="true">LAZ</span><span class="team-name">Lazio</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">6</td>
+              <td class="col-num">2</td>
+              <td class="col-num">4</td>
+              <td class="col-num col-hide-sm">16</td>
+              <td class="col-num col-hide-sm">13</td>
+              <td class="col-gd"><span class="gd is-pos">+3</span></td>
+              <td class="col-pts">20</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Galibiyet, Mağlubiyet, Galibiyet, Mağlubiyet, Galibiyet"><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="atalanta" data-team-name="Atalanta" data-zone="mid" tabindex="0">
+              <td class="col-pos">8</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#1E6FB8;--crest-b:#111;--crest-ink:#fff" aria-hidden="true">ATA</span><span class="team-name">Atalanta</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">5</td>
+              <td class="col-num">4</td>
+              <td class="col-num">3</td>
+              <td class="col-num col-hide-sm">20</td>
+              <td class="col-num col-hide-sm">14</td>
+              <td class="col-gd"><span class="gd is-pos">+6</span></td>
+              <td class="col-pts">19</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Galibiyet, Galibiyet, Galibiyet, Beraberlik, Galibiyet"><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="fiorentina" data-team-name="Fiorentina" data-zone="mid" tabindex="0">
+              <td class="col-pos">9</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#5B2A86;--crest-b:#fff;--crest-ink:#fff" aria-hidden="true">FIO</span><span class="team-name">Fiorentina</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">5</td>
+              <td class="col-num">4</td>
+              <td class="col-num">3</td>
+              <td class="col-num col-hide-sm">15</td>
+              <td class="col-num col-hide-sm">13</td>
+              <td class="col-gd"><span class="gd is-pos">+2</span></td>
+              <td class="col-pts">19</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Beraberlik, Beraberlik, Mağlubiyet, Galibiyet, Beraberlik"><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="bologna" data-team-name="Bologna" data-zone="mid" tabindex="0">
+              <td class="col-pos">10</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#1A2F5A;--crest-b:#A21C26;--crest-ink:#fff" aria-hidden="true">BOL</span><span class="team-name">Bologna</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">5</td>
+              <td class="col-num">3</td>
+              <td class="col-num">4</td>
+              <td class="col-num col-hide-sm">14</td>
+              <td class="col-num col-hide-sm">14</td>
+              <td class="col-gd"><span class="gd is-zero">0</span></td>
+              <td class="col-pts">18</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Mağlubiyet, Galibiyet, Mağlubiyet, Beraberlik, Galibiyet"><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="cagliari" data-team-name="Cagliari" data-zone="mid" tabindex="0">
+              <td class="col-pos">11</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#A5162B;--crest-b:#0E2A56;--crest-ink:#fff" aria-hidden="true">CAG</span><span class="team-name">Cagliari</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">3</td>
+              <td class="col-num">5</td>
+              <td class="col-num">4</td>
+              <td class="col-num col-hide-sm">13</td>
+              <td class="col-num col-hide-sm">14</td>
+              <td class="col-gd"><span class="gd is-neg">-1</span></td>
+              <td class="col-pts">14</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Beraberlik, Beraberlik, Galibiyet, Mağlubiyet, Beraberlik"><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="sassuolo" data-team-name="Sassuolo" data-zone="mid" tabindex="0">
+              <td class="col-pos">12</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#00A651;--crest-b:#111;--crest-ink:#fff" aria-hidden="true">SAS</span><span class="team-name">Sassuolo</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">4</td>
+              <td class="col-num">2</td>
+              <td class="col-num">6</td>
+              <td class="col-num col-hide-sm">14</td>
+              <td class="col-num col-hide-sm">18</td>
+              <td class="col-gd"><span class="gd is-neg">-4</span></td>
+              <td class="col-pts">14</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Galibiyet, Mağlubiyet, Mağlubiyet, Galibiyet, Mağlubiyet"><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="torino" data-team-name="Torino" data-zone="mid" tabindex="0">
+              <td class="col-pos">13</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#7E1B1B;--crest-b:#E9D9B0;--crest-ink:#fff" aria-hidden="true">TOR</span><span class="team-name">Torino</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">3</td>
+              <td class="col-num">4</td>
+              <td class="col-num">5</td>
+              <td class="col-num col-hide-sm">12</td>
+              <td class="col-num col-hide-sm">15</td>
+              <td class="col-gd"><span class="gd is-neg">-3</span></td>
+              <td class="col-pts">13</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Mağlubiyet, Beraberlik, Galibiyet, Mağlubiyet, Beraberlik"><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="udinese" data-team-name="Udinese" data-zone="mid" tabindex="0">
+              <td class="col-pos">14</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#26282C;--crest-b:#fff;--crest-ink:#fff" aria-hidden="true">UDI</span><span class="team-name">Udinese</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">3</td>
+              <td class="col-num">4</td>
+              <td class="col-num">5</td>
+              <td class="col-num col-hide-sm">11</td>
+              <td class="col-num col-hide-sm">14</td>
+              <td class="col-gd"><span class="gd is-neg">-3</span></td>
+              <td class="col-pts">13</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Beraberlik, Mağlubiyet, Mağlubiyet, Beraberlik, Galibiyet"><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="frosinone" data-team-name="Frosinone" data-zone="mid" tabindex="0">
+              <td class="col-pos">15</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#1C4E9A;--crest-b:#FFD200;--crest-ink:#fff" aria-hidden="true">FRO</span><span class="team-name">Frosinone</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">3</td>
+              <td class="col-num">3</td>
+              <td class="col-num">6</td>
+              <td class="col-num col-hide-sm">12</td>
+              <td class="col-num col-hide-sm">17</td>
+              <td class="col-gd"><span class="gd is-neg">-5</span></td>
+              <td class="col-pts">12</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Galibiyet, Mağlubiyet, Beraberlik, Mağlubiyet, Mağlubiyet"><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li></ol></td>
+            </tr>
+            <tr class="standings-row" data-team="lecce" data-team-name="Lecce" data-zone="mid" tabindex="0">
+              <td class="col-pos">16</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#F6D000;--crest-b:#D21F26;--crest-ink:#3A1206" aria-hidden="true">LEC</span><span class="team-name">Lecce</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">3</td>
+              <td class="col-num">2</td>
+              <td class="col-num">7</td>
+              <td class="col-num col-hide-sm">10</td>
+              <td class="col-num col-hide-sm">16</td>
+              <td class="col-gd"><span class="gd is-neg">-6</span></td>
+              <td class="col-pts">11</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Mağlubiyet, Mağlubiyet, Galibiyet, Mağlubiyet, Beraberlik"><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li></ol></td>
+            </tr>
+            <tr class="standings-row edge-rel" data-team="parma" data-team-name="Parma" data-zone="mid" tabindex="0">
+              <td class="col-pos">17</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#FFD200;--crest-b:#1D3E8A;--crest-ink:#10224A" aria-hidden="true">PAR</span><span class="team-name">Parma</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">2</td>
+              <td class="col-num">4</td>
+              <td class="col-num">6</td>
+              <td class="col-num col-hide-sm">11</td>
+              <td class="col-num col-hide-sm">18</td>
+              <td class="col-gd"><span class="gd is-neg">-7</span></td>
+              <td class="col-pts">10</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Beraberlik, Mağlubiyet, Beraberlik, Mağlubiyet, Galibiyet"><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--w" title="Galibiyet">G</span></li></ol></td>
+            </tr>
+            <tr class="standings-row zone-rel" data-team="genoa" data-team-name="Genoa" data-zone="rel" tabindex="0">
+              <td class="col-pos">18</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#A2172E;--crest-b:#002B5C;--crest-ink:#fff" aria-hidden="true">GEN</span><span class="team-name">Genoa</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">2</td>
+              <td class="col-num">3</td>
+              <td class="col-num">7</td>
+              <td class="col-num col-hide-sm">10</td>
+              <td class="col-num col-hide-sm">19</td>
+              <td class="col-gd"><span class="gd is-neg">-9</span></td>
+              <td class="col-pts">9</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Mağlubiyet, Beraberlik, Mağlubiyet, Mağlubiyet, Beraberlik"><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li></ol></td>
+            </tr>
+            <tr class="standings-row zone-rel" data-team="monza" data-team-name="Monza" data-zone="rel" tabindex="0">
+              <td class="col-pos">19</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#D2122E;--crest-b:#fff;--crest-ink:#fff" aria-hidden="true">MON</span><span class="team-name">Monza</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">2</td>
+              <td class="col-num">2</td>
+              <td class="col-num">8</td>
+              <td class="col-num col-hide-sm">9</td>
+              <td class="col-num col-hide-sm">23</td>
+              <td class="col-gd"><span class="gd is-neg">-14</span></td>
+              <td class="col-pts">8</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Mağlubiyet, Mağlubiyet, Beraberlik, Mağlubiyet, Mağlubiyet"><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li></ol></td>
+            </tr>
+            <tr class="standings-row zone-rel" data-team="venezia" data-team-name="Venezia" data-zone="rel" tabindex="0">
+              <td class="col-pos">20</td>
+              <th scope="row" class="col-team"><div class="team-cell"><span class="team-crest" style="--crest-a:#141414;--crest-b:#F06A1A;--crest-ink:#fff" aria-hidden="true">VEN</span><span class="team-name">Venezia</span></div></th>
+              <td class="col-num">12</td>
+              <td class="col-num">1</td>
+              <td class="col-num">2</td>
+              <td class="col-num">9</td>
+              <td class="col-num col-hide-sm">8</td>
+              <td class="col-num col-hide-sm">25</td>
+              <td class="col-gd"><span class="gd is-neg">-17</span></td>
+              <td class="col-pts">5</td>
+              <td class="col-form"><ol class="form-list" aria-label="Son 5 maç, eskiden yeniye: Mağlubiyet, Mağlubiyet, Mağlubiyet, Beraberlik, Mağlubiyet"><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li><li><span class="form-badge form-badge--d" title="Beraberlik">B</span></li><li><span class="form-badge form-badge--l" title="Mağlubiyet">M</span></li></ol></td>
+            </tr>
+                  <tr class="empty-row" data-empty-row hidden>
+                    <td colspan="11"><strong>Bu filtreyle eşleşen takım yok</strong>Aramayı temizle ya da “Tümü” filtresini seç.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-foot">
+              <span>Gösterilen takım: <strong data-visible-count>20</strong> / 20</span>
+              <span>Son güncelleme: 22 Eylül 2026, 23:45</span>
+            </div>
+          </section>
+        </div>
+
+        <!-- ===== Partial: _StandingsSidebar ===== -->
+        <aside class="col-xl-3" aria-label="Tablo açıklamaları">
+          <div class="side-stack">
+            <section class="side-card">
+              <h2 class="side-card__title">Renklerin anlamı</h2>
+              <ul class="legend-list">
+                <li><span class="legend-swatch" style="--swatch:var(--blue)"></span><div><strong>Şampiyonlar Ligi</strong><span>1-4. sıra</span></div></li>
+                <li><span class="legend-swatch" style="--swatch:var(--green)"></span><div><strong>Avrupa kupaları</strong><span>5-6. sıra</span></div></li>
+                <li><span class="legend-swatch" style="--swatch:var(--red)"></span><div><strong>Düşme hattı</strong><span>18-20. sıra</span></div></li>
+              </ul>
+              <ul class="form-key" aria-label="Form rozetleri">
+                <li><span class="form-badge form-badge--w">G</span>Galibiyet</li>
+                <li><span class="form-badge form-badge--d">B</span>Beraberlik</li>
+                <li><span class="form-badge form-badge--l">M</span>Mağlubiyet</li>
+              </ul>
+            </section>
+
+            <section class="side-card">
+              <h2 class="side-card__title">Formda olanlar</h2>
+              <p>Son 5 maçta toplanan puan</p>
+              <ol class="form-leaders">
+              <li><span class="team-crest team-crest--sm" style="--crest-a:#0A4FA8;--crest-b:#101418;--crest-ink:#fff" aria-hidden="true">INT</span><span class="team-name">Inter</span><span class="form-leaders__pts">13 <small>/ 15</small></span><span class="form-meter" aria-hidden="true"><span style="--w:87%"></span></span></li>
+              <li><span class="team-crest team-crest--sm" style="--crest-a:#1E6FB8;--crest-b:#111;--crest-ink:#fff" aria-hidden="true">ATA</span><span class="team-name">Atalanta</span><span class="form-leaders__pts">13 <small>/ 15</small></span><span class="form-meter" aria-hidden="true"><span style="--w:87%"></span></span></li>
+              <li><span class="team-crest team-crest--sm" style="--crest-a:#1E9BD7;--crest-b:#0C3C78;--crest-ink:#fff" aria-hidden="true">NAP</span><span class="team-name">Napoli</span><span class="form-leaders__pts">10 <small>/ 15</small></span><span class="form-meter" aria-hidden="true"><span style="--w:67%"></span></span></li>
+              </ol>
+            </section>
+
+            <section class="side-card note-card">
+              <h2 class="side-card__title">Sıralama notu</h2>
+              <p>Puan eşitliğinde averaj dikkate alınır. Averaj da eşitse atılan gol sayısına bakılır.</p>
+              <p>Son 5 maçta en sağdaki rozet en son oynanan maçtır.</p>
+            </section>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+  <script>
+/* Serie A Puan Durumu - standings.js
+   Bölge filtresi, takım arama, satır seçimi ve puan dağılımı <-> tablo eşlemesi. */
+(function () {
+  'use strict';
+
+  const root = document.querySelector('[data-standings]');
+  if (!root) return;
+
+  const rows = Array.from(root.querySelectorAll('.standings-row'));
+  const markers = Array.from(root.querySelectorAll('[data-ladder-team]'));
+  const chips = Array.from(root.querySelectorAll('[data-zone-filter]'));
+  const search = root.querySelector('[data-team-search]');
+  const counter = root.querySelector('[data-visible-count]');
+  const emptyRow = root.querySelector('[data-empty-row]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let activeZone = 'all';
+  let selectedTeam = null;
+
+  const normalize = (value) =>
+    value.toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  /* Filtreleme ------------------------------------------------ */
+  function applyFilters() {
+    const query = normalize(search ? search.value.trim() : '');
+    let visible = 0;
+
+    rows.forEach((row) => {
+      const zoneMatch = activeZone === 'all' || row.dataset.zone === activeZone;
+      const textMatch = !query || normalize(row.dataset.teamName).includes(query);
+      row.hidden = !(zoneMatch && textMatch);
+      if (!row.hidden) visible += 1;
+    });
+
+    if (counter) counter.textContent = String(visible);
+    if (emptyRow) emptyRow.hidden = visible !== 0;
+  }
+
+  function setZone(zone) {
+    activeZone = zone;
+    chips.forEach((chip) =>
+      chip.setAttribute('aria-pressed', String(chip.dataset.zoneFilter === zone)));
+    applyFilters();
+  }
+
+  function resetFilters() {
+    if (search) search.value = '';
+    setZone('all');
+  }
+
+  chips.forEach((chip) => chip.addEventListener('click', () => setZone(chip.dataset.zoneFilter)));
+  if (search) search.addEventListener('input', applyFilters);
+
+  /* Seçim ----------------------------------------------------- */
+  function selectTeam(team, { scrollToRow = false } = {}) {
+    selectedTeam = selectedTeam === team ? null : team;
+
+    rows.forEach((row) => row.classList.toggle('is-selected', row.dataset.team === selectedTeam));
+    markers.forEach((marker) => {
+      const on = marker.dataset.ladderTeam === selectedTeam;
+      marker.classList.toggle('is-active', on);
+      marker.setAttribute('aria-pressed', String(on));
+    });
+
+    if (!scrollToRow || !selectedTeam) return;
+    const row = rows.find((r) => r.dataset.team === selectedTeam);
+    if (!row) return;
+    if (row.hidden) resetFilters();
+    row.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+
+  rows.forEach((row) => {
+    row.addEventListener('click', () => selectTeam(row.dataset.team));
+    row.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        selectTeam(row.dataset.team);
+      }
+    });
+  });
+
+  markers.forEach((marker) =>
+    marker.addEventListener('click', () => selectTeam(marker.dataset.ladderTeam, { scrollToRow: true })));
+
+  /* Hover eşleme: tablo satırı <-> puan dağılımı ------------- */
+  function linkHover(team, on) {
+    rows.forEach((r) => { if (r.dataset.team === team) r.classList.toggle('is-hover', on); });
+    markers.forEach((m) => { if (m.dataset.ladderTeam === team) m.classList.toggle('is-hover', on); });
+  }
+  rows.forEach((row) => {
+    row.addEventListener('mouseenter', () => linkHover(row.dataset.team, true));
+    row.addEventListener('mouseleave', () => linkHover(row.dataset.team, false));
+  });
+  markers.forEach((marker) => {
+    marker.addEventListener('mouseenter', () => linkHover(marker.dataset.ladderTeam, true));
+    marker.addEventListener('mouseleave', () => linkHover(marker.dataset.ladderTeam, false));
+  });
+
+  applyFilters();
+})();
+
+  </script>
+</body>
+</html>

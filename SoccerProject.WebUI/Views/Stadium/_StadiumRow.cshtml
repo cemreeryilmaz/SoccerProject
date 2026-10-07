@@ -1,0 +1,21 @@
+@model ResultStadiumDto
+<tr>
+    <td class="col-id">@Model.StadiumId</td>
+    <td>
+        <div class="team-cell">
+            <span class="team-crest" aria-hidden="true"><svg class="icon" style="width:18px;height:18px"><use href="#i-stadium"/></svg></span>
+            <div>
+                <span class="team-name">@Model.Name</span>
+                <span class="team-code">@Model.City</span>
+            </div>
+        </div>
+    </td>
+    <td>@Model.City</td>
+    <td>@Model.Capacity.ToString("N0")</td>
+    <td class="col-actions">
+        <div class="row-actions">
+            <a class="act-btn" href="/Stadium/UpdateStadium/@Model.StadiumId" title="Düzenle" aria-label="Düzenle: @Model.Name"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg></a>
+            <a class="act-btn act-btn--danger" href="/Stadium/DeleteStadium/@Model.StadiumId" title="Sil" aria-label="Sil: @Model.Name" onclick="return confirm('@Model.Name silinsin mi?');"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></a>
+        </div>
+    </td>
+</tr>

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SoccerProject.WebAPI/SoccerProject.WebAPI.csproj" />
+  <Project Path="SoccerProject.WebUI/SoccerProject.WebUI.csproj" />
+</Solution>

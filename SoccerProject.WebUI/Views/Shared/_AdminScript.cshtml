@@ -1,0 +1,14 @@
+<script>
+    (function () {
+        'use strict';
+        var toggleBtn = document.querySelector('[data-sidebar-toggle]');
+        function setSidebar(open) {
+            document.body.classList.toggle('sidebar-open', open);
+            if (toggleBtn) toggleBtn.setAttribute('aria-expanded', String(open));
+        }
+        if (toggleBtn) toggleBtn.addEventListener('click', function () { setSidebar(!document.body.classList.contains('sidebar-open')); });
+        var closeEl = document.querySelector('[data-sidebar-close]');
+        if (closeEl) closeEl.addEventListener('click', function () { setSidebar(false); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setSidebar(false); });
+    })();
+</script>

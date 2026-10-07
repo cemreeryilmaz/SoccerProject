@@ -1,0 +1,132 @@
+@model StadiumDetailViewModel
+@{
+    Layout = null;
+    var s = Model.Stadium;
+    ViewData["Title"] = s.Name;
+    var played = Model.Fixtures.Where(f => f.Status == SoccerProject.WebUI.Enums.MatchStatus.Finished).ToList();
+    var upcoming = Model.Fixtures.Where(f => f.Status != SoccerProject.WebUI.Enums.MatchStatus.Finished).ToList();
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <style>
+        :root {
+            --bg:#070F1F; --surface:#0F1D38; --surface-2:#142647; --line:#1F3358; --line-soft:rgba(31,51,88,.6);
+            --text:#E9F0FB; --text-2:#C4D0E6; --muted:#8B9CC0; --dim:#6A7DA3;
+            --blue:#2E7BFF; --blue-bright:#5B9BFF; --green:#1FC98A; --amber:#F2B53B;
+            --radius-lg:20px; --radius-md:14px;
+            --font-display:"Barlow Condensed","Arial Narrow",sans-serif;
+            --font-body:"Barlow","Segoe UI",system-ui,sans-serif;
+        }
+        body.stadium-page { min-height:100vh; margin:0; background-color:var(--bg);
+            background-image:radial-gradient(1100px 480px at 50% -10%, rgba(46,123,255,.20), transparent 62%);
+            background-repeat:no-repeat; color:var(--text); font-family:var(--font-body); }
+        a { text-decoration:none; color:inherit; }
+        .shell { padding-block:28px 72px; }
+        .top-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+        .top-bar a { padding:8px 14px; border:1px solid var(--line); border-radius:999px; color:var(--text-2); font-size:.85rem; font-weight:600; }
+        .top-bar a:hover { border-color:var(--blue); color:#fff; }
+        .back-link { display:inline-flex; align-items:center; gap:6px; margin-bottom:16px; color:var(--blue-bright); font-weight:600; font-size:.9rem; }
+        .hero { position:relative; overflow:hidden; padding:32px 34px; border:1px solid var(--line); border-radius:var(--radius-lg); background:linear-gradient(160deg,#112552 0%,#0B1834 55%,#09142A 100%); }
+        .hero::after { content:""; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,var(--blue),var(--blue-bright) 30%,transparent 75%); }
+        .hero > * { position:relative; }
+        .hero-ico { display:grid; place-items:center; width:54px; height:54px; border-radius:14px; background:rgba(46,123,255,.15); color:var(--blue-bright); margin-bottom:14px; }
+        .hero-ico svg { width:30px; height:30px; }
+        .hero h1 { margin:0; font-family:var(--font-display); font-size:clamp(2.3rem,5vw,3.6rem); font-weight:700; line-height:.98; }
+        .hero .city { margin:8px 0 0; color:var(--muted); font-size:1.05rem; }
+        .info-grid { margin-top:22px; }
+        .info-card { height:100%; padding:18px 20px; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--surface); }
+        .info-card dt { color:var(--muted); font-size:.82rem; font-weight:500; margin-bottom:4px; }
+        .info-card dd { margin:0; font-family:var(--font-display); font-size:1.8rem; font-weight:700; }
+        .section-title { margin:30px 0 14px; font-family:var(--font-display); font-size:1.5rem; font-weight:600; }
+        .match-panel { padding:6px 20px; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--surface); }
+        .match-list { margin:0; padding:0; list-style:none; }
+        .match-row { display:grid; grid-template-columns:96px 1fr auto; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--line-soft); }
+        .match-row:last-child { border-bottom:0; }
+        .match-date { color:var(--dim); font-size:.82rem; }
+        .match-teams { display:flex; align-items:center; gap:10px; min-width:0; }
+        .team-crest { --size:26px; flex:none; display:inline-grid; place-items:center; width:var(--size); height:var(--size);
+            border-radius:50%; background:linear-gradient(180deg,var(--crest-a) 0 70%,var(--crest-b) 70% 100%); color:var(--crest-ink,#fff);
+            font-family:var(--font-display); font-size:calc(var(--size)*.33); font-weight:700; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.16); }
+        .match-teams .vs { color:var(--dim); font-size:.8rem; }
+        .match-teams .nm { color:var(--text-2); font-weight:600; }
+        .match-score { font-family:var(--font-display); font-size:1.3rem; font-weight:700; color:#fff; padding:2px 12px; border-radius:8px; background:rgba(46,123,255,.14); }
+        .match-score.soon { background:transparent; color:var(--dim); font-size:.9rem; font-family:var(--font-body); font-weight:600; }
+        .empty { color:var(--muted); padding:16px 0; }
+    </style>
+</head>
+<body class="stadium-page">
+    <main class="shell container-xl">
+        <div class="top-bar">
+            <a href="/Fixture">Fikstür</a>
+            <a href="/Standing">Puan Durumu</a>
+            <a href="/Players">Futbolcular</a>
+            <a href="/Players/TopScorers">Gol Krallığı</a>
+            <a href="/Stadiums">Stadyumlar</a>
+            <a href="/Match">Maç Sonuçları</a>
+        </div>
+
+        <a class="back-link" href="/Stadiums">← Stadyumlara dön</a>
+
+        <section class="hero">
+            <span class="hero-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><ellipse cx="12" cy="9" rx="9" ry="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 9v6c0 1.9 4 3.5 9 3.5s9-1.6 9-3.5V9" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+            </span>
+            <h1>@s.Name</h1>
+            <p class="city">@s.City</p>
+        </section>
+
+        <div class="row g-3 info-grid">
+            <div class="col-6 col-md-4">
+                <dl class="info-card"><dt>Kapasite</dt><dd>@s.Capacity.ToString("N0")</dd></dl>
+            </div>
+            <div class="col-6 col-md-4">
+                <dl class="info-card"><dt>Şehir</dt><dd style="font-size:1.4rem">@s.City</dd></dl>
+            </div>
+            <div class="col-6 col-md-4">
+                <dl class="info-card"><dt>Oynanan maç</dt><dd>@played.Count</dd></dl>
+            </div>
+        </div>
+
+        <h2 class="section-title">Bu stadyumdaki maçlar</h2>
+        <div class="match-panel">
+            @if (Model.Fixtures.Any())
+            {
+                <ul class="match-list">
+                    @foreach (var f in Model.Fixtures.OrderByDescending(x => x.MatchDate))
+                    {
+                        var finished = f.Status == SoccerProject.WebUI.Enums.MatchStatus.Finished;
+                        <li class="match-row">
+                            <span class="match-date">@f.MatchDate.ToString("dd.MM.yyyy")</span>
+                            <a class="match-teams" href="/Match/Detail/@f.FixtureId">
+                                <span class="team-crest" style="@TeamVisual.Style(f.HomeTeamName)" aria-hidden="true">@TeamVisual.Code(f.HomeTeamName)</span>
+                                <span class="nm">@f.HomeTeamName</span>
+                                <span class="vs">—</span>
+                                <span class="nm">@f.AwayTeamName</span>
+                                <span class="team-crest" style="@TeamVisual.Style(f.AwayTeamName)" aria-hidden="true">@TeamVisual.Code(f.AwayTeamName)</span>
+                            </a>
+                            @if (finished)
+                            {
+                                <span class="match-score">@f.HomeTeamScore - @f.AwayTeamScore</span>
+                            }
+                            else
+                            {
+                                <span class="match-score soon">@f.MatchDate.ToString("HH:mm")</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="empty">Bu stadyuma bağlı maç bulunamadı.</p>
+            }
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,82 @@
+@model UpdateTeamDto
+@{
+    Layout = null;
+    ViewData["Title"] = "Takımı Düzenle";
+    ViewData["ActiveNav"] = "teams";
+    ViewData["AdminTitle"] = "Takımı Düzenle";
+    ViewData["AdminCrumb"] = "Yönetim / Takımlar / Düzenle";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+</head>
+<body class="admin">
+    <partial name="_AdminIcons" />
+    <partial name="_AdminSidebar" />
+
+    <div class="admin-main">
+        <partial name="_AdminTopbar" />
+
+        <main class="admin-content">
+            <div class="page-head">
+                <div>
+                    <span class="page-eyebrow">Serie A 2026/27</span>
+                    <h1 class="page-title">Takımı Düzenle</h1>
+                    <p class="page-desc">@Model.TeamName kulübünün bilgilerini güncelleyin.</p>
+                </div>
+                <a class="btn-a btn-a--secondary" href="/Team">
+                    <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Listeye Dön
+                </a>
+            </div>
+
+            <section class="card-a form-card" aria-label="Takım formu">
+                <form asp-action="UpdateTeam" asp-controller="Team" method="post">
+                    <input type="hidden" name="TeamId" value="@Model.TeamId" />
+                    <div class="form-card__body">
+                        <div class="crest-preview" aria-live="polite">
+                            <span class="team-crest team-crest--lg" id="preview-crest" style="@TeamVisual.Style(Model.TeamName)" aria-hidden="true">@TeamVisual.Code(Model.TeamName)</span>
+                            <div>
+                                <span class="crest-preview__name" id="preview-name">@Model.TeamName</span>
+                                <span class="crest-preview__meta">Takım ID: @Model.TeamId</span>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-field span-2">
+                                <label class="field-label" for="TeamName">Takım Adı <span class="req">*</span></label>
+                                <input class="input-a" id="TeamName" name="TeamName" type="text" maxlength="60" autocomplete="off" required value="@Model.TeamName">
+                            </div>
+                            <div class="form-field span-2">
+                                <label class="field-label" for="LogoUrl">Logo URL</label>
+                                <input class="input-a" id="LogoUrl" name="LogoUrl" type="text" autocomplete="off" value="@Model.LogoUrl">
+                                <p class="field-hint">Boş bırakılırsa arma renklerle otomatik çizilir.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-foot">
+                        <a class="btn-a btn-a--secondary" href="/Team">Vazgeç</a>
+                        <button type="submit" class="btn-a btn-a--primary"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Güncelle</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <partial name="_AdminScript" />
+    <script>
+        (function () {
+            var nameEl = document.getElementById('TeamName');
+            var nameOut = document.getElementById('preview-name');
+            nameEl.addEventListener('input', function () {
+                nameOut.textContent = (nameEl.value || '').trim() || 'Takım adı';
+            });
+        })();
+    </script>
+</body>
+</html>

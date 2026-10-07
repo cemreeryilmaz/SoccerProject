@@ -1,0 +1,122 @@
+@model CreateFixtureDto
+@{
+    Layout = null;
+    ViewData["Title"] = "Yeni Maç Ekle";
+    ViewData["ActiveNav"] = "matches";
+    ViewData["AdminTitle"] = "Yeni Maç Ekle";
+    ViewData["AdminCrumb"] = "Yönetim / Maçlar / Yeni";
+    var teams = ViewBag.Teams as List<ResultTeamDto> ?? new List<ResultTeamDto>();
+    var stadiums = ViewBag.Stadiums as List<ResultStadiumDto> ?? new List<ResultStadiumDto>();
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+</head>
+<body class="admin">
+    <partial name="_AdminIcons" />
+    <partial name="_AdminSidebar" />
+
+    <div class="admin-main">
+        <partial name="_AdminTopbar" />
+
+        <main class="admin-content">
+            <div class="page-head">
+                <div>
+                    <span class="page-eyebrow">Serie A 2026/27</span>
+                    <h1 class="page-title">Yeni Maç Ekle</h1>
+                    <p class="page-desc">Fikstüre yeni bir karşılaşma ekleyin.</p>
+                </div>
+                <a class="btn-a btn-a--secondary" href="/Match">
+                    <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Listeye Dön
+                </a>
+            </div>
+
+            <section class="card-a form-card" aria-label="Maç formu">
+                <form asp-action="CreateMatch" asp-controller="Match" method="post">
+                    <div class="form-card__body">
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label class="field-label" for="WeekNumber">Hafta <span class="req">*</span></label>
+                                <input class="input-a" id="WeekNumber" name="WeekNumber" type="number" min="1" max="38" required value="@(Model?.WeekNumber > 0 ? Model.WeekNumber : 1)">
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="Status">Maç Durumu</label>
+                                <select class="select-a" id="Status" name="Status">
+                                    <option value="0">Başlamadı</option>
+                                    <option value="1">Canlı</option>
+                                    <option value="2">Tamamlandı</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="HomeTeamId">Ev Sahibi Takım <span class="req">*</span></label>
+                                <select class="select-a" id="HomeTeamId" name="HomeTeamId" required>
+                                    <option value="">Takım seçin</option>
+                                    @foreach (var t in teams)
+                                    {
+                                        <option value="@t.TeamId">@t.TeamName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="AwayTeamId">Deplasman Takımı <span class="req">*</span></label>
+                                <select class="select-a" id="AwayTeamId" name="AwayTeamId" required>
+                                    <option value="">Takım seçin</option>
+                                    @foreach (var t in teams)
+                                    {
+                                        <option value="@t.TeamId">@t.TeamName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-field span-2">
+                                <label class="field-label" for="MatchDate">Maç Tarihi ve Saati <span class="req">*</span></label>
+                                <input class="input-a" id="MatchDate" name="MatchDate" type="datetime-local" required>
+                            </div>
+                            <div class="form-field span-2">
+                                <label class="field-label" for="StadiumId">Stadyum</label>
+                                <select class="select-a" id="StadiumId" name="StadiumId" onchange="document.getElementById('Stadium').value = this.options[this.selectedIndex].getAttribute('data-name') || '';">
+                                    <option value="">Stadyum seçin</option>
+                                    @foreach (var st in stadiums)
+                                    {
+                                        <option value="@st.StadiumId" data-name="@st.Name" selected="@(Model?.StadiumId == st.StadiumId)">@st.Name (@st.City)</option>
+                                    }
+                                </select>
+                                <input type="hidden" id="Stadium" name="Stadium" value="@Model?.Stadium" />
+                            </div>
+
+                            <div class="form-field">
+                                <label class="field-label" for="HomeTeamHalfScore">Ev sahibi ilk yarı</label>
+                                <input class="input-a" id="HomeTeamHalfScore" name="HomeTeamHalfScore" type="number" min="0" max="20" value="0">
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="AwayTeamHalfScore">Deplasman ilk yarı</label>
+                                <input class="input-a" id="AwayTeamHalfScore" name="AwayTeamHalfScore" type="number" min="0" max="20" value="0">
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="HomeTeamScore">Ev sahibi skor</label>
+                                <input class="input-a" id="HomeTeamScore" name="HomeTeamScore" type="number" min="0" max="20" value="0">
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="AwayTeamScore">Deplasman skor</label>
+                                <input class="input-a" id="AwayTeamScore" name="AwayTeamScore" type="number" min="0" max="20" value="0">
+                            </div>
+                        </div>
+                        <p class="field-hint" style="margin-top:14px">Skorlar yalnızca Canlı veya Tamamlandı maçlar için anlamlıdır.</p>
+                    </div>
+                    <div class="form-foot">
+                        <a class="btn-a btn-a--secondary" href="/Match">Vazgeç</a>
+                        <button type="submit" class="btn-a btn-a--primary"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Kaydet</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <partial name="_AdminScript" />
+</body>
+</html>

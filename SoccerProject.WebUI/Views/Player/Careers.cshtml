@@ -1,0 +1,117 @@
+@model GetByIdPlayerDto
+@{
+    Layout = null;
+    ViewData["Title"] = "Kariyer Yönetimi";
+    ViewData["ActiveNav"] = "players";
+    ViewData["AdminTitle"] = "Kariyer Yönetimi";
+    ViewData["AdminCrumb"] = "Yönetim / Futbolcular / Kariyer";
+    var careers = (Model.Careers ?? new()).OrderByDescending(c => c.StartYear).ToList();
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+</head>
+<body class="admin">
+    <partial name="_AdminIcons" />
+    <partial name="_AdminSidebar" />
+
+    <div class="admin-main">
+        <partial name="_AdminTopbar" />
+
+        <main class="admin-content">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger" role="alert" style="margin-bottom:16px;">@TempData["ErrorMessage"]</div>
+            }
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success" role="alert" style="margin-bottom:16px;">@TempData["SuccessMessage"]</div>
+            }
+            <div class="page-head">
+                <div>
+                    <span class="page-eyebrow">@Model.TeamName</span>
+                    <h1 class="page-title">@Model.FullName — Kariyer</h1>
+                    <p class="page-desc">Oynadığı kulüpleri (kariyer geçmişi) ekleyin veya silin.</p>
+                </div>
+                <a class="btn-a btn-a--secondary" href="/Player">
+                    <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Futbolculara Dön
+                </a>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <section class="card-a" aria-label="Kariyer listesi">
+                        <div class="table-scroll">
+                            <table class="team-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Kulüp</th>
+                                        <th scope="col">Başlangıç</th>
+                                        <th scope="col">Bitiş</th>
+                                        <th scope="col" class="col-actions">İşlem</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!careers.Any())
+                                    {
+                                        <tr class="table-empty"><td colspan="4"><strong>Kariyer kaydı yok</strong>Sağdaki formdan ilk kaydı ekleyin.</td></tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var c in careers)
+                                        {
+                                            <tr>
+                                                <td><strong>@c.ClubName</strong></td>
+                                                <td>@c.StartYear</td>
+                                                <td>@(c.EndYear?.ToString() ?? "Halen")</td>
+                                                <td class="col-actions">
+                                                    <a class="act-btn act-btn--danger" href="/Player/DeleteCareer?id=@c.PlayerCareerId&playerId=@Model.PlayerId" title="Sil" onclick="return confirm('@c.ClubName kaydı silinsin mi?');"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="col-lg-5">
+                    <section class="card-a form-card" aria-label="Kariyer ekle">
+                        <form asp-action="AddCareer" asp-controller="Player" method="post">
+                            <input type="hidden" name="PlayerId" value="@Model.PlayerId" />
+                            <div class="form-card__body">
+                                <div class="form-grid">
+                                    <div class="form-field span-2">
+                                        <label class="field-label" for="ClubName">Kulüp <span class="req">*</span></label>
+                                        <input class="input-a" id="ClubName" name="ClubName" type="text" maxlength="60" placeholder="Örn. Sporting CP" autocomplete="off" required>
+                                    </div>
+                                    <div class="form-field">
+                                        <label class="field-label" for="StartYear">Başlangıç yılı <span class="req">*</span></label>
+                                        <input class="input-a" id="StartYear" name="StartYear" type="number" min="1980" max="2030" value="2024" required>
+                                    </div>
+                                    <div class="form-field">
+                                        <label class="field-label" for="EndYear">Bitiş yılı</label>
+                                        <input class="input-a" id="EndYear" name="EndYear" type="number" min="1980" max="2030" placeholder="Boş = halen">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-foot">
+                                <button type="submit" class="btn-a btn-a--primary"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Kariyer Ekle</button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <partial name="_AdminScript" />
+</body>
+</html>

@@ -1,0 +1,93 @@
+@model List<ResultTeamDto>
+@{
+    Layout = null;
+    ViewData["Title"] = "Takım Yönetimi";
+    ViewData["ActiveNav"] = "teams";
+    ViewData["AdminTitle"] = "Takım Yönetimi";
+    ViewData["AdminCrumb"] = "Yönetim / Takımlar";
+    var teams = Model ?? new List<ResultTeamDto>();
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+</head>
+<body class="admin">
+    <partial name="_AdminIcons" />
+    <partial name="_AdminSidebar" />
+
+    <div class="admin-main">
+        <partial name="_AdminTopbar" />
+
+        <main class="admin-content">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger" role="alert" style="margin-bottom:16px;">@TempData["ErrorMessage"]</div>
+            }
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success" role="alert" style="margin-bottom:16px;">@TempData["SuccessMessage"]</div>
+            }
+            <div class="page-head">
+                <div>
+                    <span class="page-eyebrow">Serie A 2026/27</span>
+                    <h1 class="page-title">Takım Yönetimi</h1>
+                    <p class="page-desc">Serie A kulüplerini görüntüleyebilir, ekleyebilir, düzenleyebilir ve silebilirsiniz.</p>
+                </div>
+                <a class="btn-a btn-a--primary" href="/Team/CreateTeam">
+                    <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Yeni Takım Ekle
+                </a>
+            </div>
+
+            <section class="league-strip" aria-label="Lig özeti">
+                <div class="strip-item strip-item--green"><span class="strip-icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><div><span class="strip-label">Kayıtlı takım</span><span class="strip-value">@teams.Count <small>/ 20</small></span></div></div>
+                <div class="strip-item strip-item--blue"><span class="strip-icon"><svg class="icon" aria-hidden="true"><use href="#i-ball"/></svg></span><div><span class="strip-label">Lig</span><span class="strip-value">Serie A</span></div></div>
+                <div class="strip-item strip-item--navy"><span class="strip-icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></span><div><span class="strip-label">Sezon</span><span class="strip-value">2026/27</span></div></div>
+                <div class="strip-item strip-item--red"><span class="strip-icon"><svg class="icon" aria-hidden="true"><use href="#i-table"/></svg></span><div><span class="strip-label">Ülke</span><span class="strip-value">İtalya</span></div></div>
+            </section>
+
+            <section class="card-a" aria-label="Takım listesi">
+                <div class="table-scroll">
+                    <table class="team-table">
+                        <caption class="visually-hidden">Serie A takım listesi</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="col-id">ID</th>
+                                <th scope="col">Takım</th>
+                                <th scope="col">Renkler</th>
+                                <th scope="col">Logo URL</th>
+                                <th scope="col">Durum</th>
+                                <th scope="col" class="col-actions">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!teams.Any())
+                            {
+                                <tr class="table-empty"><td colspan="6"><strong>Takım bulunamadı</strong>Yeni Takım Ekle ile ilk takımı oluşturun.</td></tr>
+                            }
+                            else
+                            {
+                                @foreach (var t in teams)
+                                {
+                                    <partial name="_TeamRow" model="t" />
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-foot">
+                    <span>Toplam @teams.Count takım</span>
+                    <span>Kaynak: SoccerProject.WebAPI</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <partial name="_AdminScript" />
+</body>
+</html>

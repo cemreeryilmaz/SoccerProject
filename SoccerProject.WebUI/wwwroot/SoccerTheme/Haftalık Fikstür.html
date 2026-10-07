@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Serie A Fikstür</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+  <style>
+    /* =============================================================
+       Serie A Fikstür - fixtures.css
+       1 Tokens   2 Base   3 Hero   4 Hafta seçici   5 Aktif hafta bandı
+       6 Gün grupları + maç kartı   7 Durum rozetleri
+       8 Haftanın özeti   9 Öne çıkan maç   10 Responsive
+       ============================================================= */
+
+    /* 1. Tokens */
+    :root {
+      --bg: #070F1F;
+      --bg-2: #0B1730;
+      --surface: #0F1D38;
+      --surface-2: #142647;
+      --line: #1F3358;
+      --line-soft: rgba(31, 51, 88, .6);
+      --line-hover: #2C4675;
+
+      --text: #E9F0FB;
+      --text-2: #C4D0E6;
+      --muted: #8B9CC0;
+      --dim: #6A7DA3;
+
+      --blue: #2E7BFF;
+      --blue-bright: #5B9BFF;
+      --blue-soft: rgba(46, 123, 255, .14);
+      --ice: #A9BCDF;
+      --green: #1FC98A;
+      --amber: #F2B53B;
+      --red: #F2475C;
+
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+
+      --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+      --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+    }
+
+    /* 2. Base */
+    body.fixtures-page {
+      min-height: 100vh;
+      margin: 0;
+      background-color: var(--bg);
+      background-image: radial-gradient(1100px 480px at 12% -8%, rgba(46, 123, 255, .20), transparent 62%);
+      background-repeat: no-repeat;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.5;
+      font-variant-numeric: tabular-nums;
+    }
+    .fixtures-shell { padding-block: 32px 72px; }
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      overflow: hidden; clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    /* Takım arması (logo yer tutucu) - gerçek projede <img class="team-crest"> ile değiştirilebilir */
+    .team-crest {
+      --size: 34px;
+      flex: none;
+      display: inline-grid;
+      place-items: center;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: linear-gradient(180deg, var(--crest-a) 0 70%, var(--crest-b) 70% 100%);
+      color: var(--crest-ink, #fff);
+      font-family: var(--font-display);
+      font-size: calc(var(--size) * .34);
+      font-weight: 700;
+      line-height: 1;
+      padding-bottom: calc(var(--size) * .12);
+      box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .16);
+    }
+    .team-crest--lg { --size: 64px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.18), 0 10px 26px rgba(0,0,0,.35); }
+    img.team-crest { object-fit: contain; background: none; padding: 0; box-shadow: none; }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+    .panel__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel__title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    .panel__sub { color: var(--dim); font-size: .8rem; }
+
+    /* 3. Hero */
+    .fixtures-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 28px 32px 26px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(160deg, #112552 0%, #0B1834 55%, #09142A 100%);
+    }
+    .fixtures-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 72px, transparent 72px 144px);
+      pointer-events: none;
+    }
+    .fixtures-hero::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--blue) 0%, var(--blue-bright) 30%, transparent 75%);
+    }
+    .fixtures-hero > * { position: relative; }
+    .hero-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 22px;
+    }
+    .hero-league {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .hero-league__name { display: flex; align-items: center; gap: 10px; }
+    .league-mark {
+      display: grid;
+      place-items: center;
+      width: 30px; height: 30px;
+      border-radius: 9px;
+      background: linear-gradient(145deg, var(--blue-bright), var(--blue));
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: .95rem;
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(46, 123, 255, .35);
+    }
+    .season-select { position: relative; }
+    .season-select select {
+      appearance: none;
+      padding: 6px 34px 6px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      font: inherit;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .season-select select:focus-visible { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
+    .season-select svg {
+      position: absolute;
+      top: 50%; right: 12px;
+      width: 14px; height: 14px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .hero-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5.2vw, 4rem);
+      font-weight: 700;
+      line-height: .95;
+    }
+    .hero-subtitle { max-width: 52ch; margin: 12px 0 0; color: var(--muted); }
+    .hero-meta { display: flex; gap: 10px; margin: 0; }
+    .hero-meta > div {
+      min-width: 96px;
+      padding: 10px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, .035);
+    }
+    .hero-meta dt { color: var(--muted); font-size: .8rem; font-weight: 500; }
+    .hero-meta dd { margin: 0; font-family: var(--font-display); font-size: 1.65rem; font-weight: 600; line-height: 1.1; }
+
+    /* 4. Hafta seçici */
+    .week-nav {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .week-arrow {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 52px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: border-color .15s ease, background-color .15s ease;
+    }
+    .week-arrow svg { width: 20px; height: 20px; }
+    .week-arrow:hover:not(:disabled) { border-color: var(--line-hover); background: var(--surface-2); }
+    .week-arrow:disabled { opacity: .35; cursor: not-allowed; }
+    .week-list {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .week-btn {
+      width: 100%;
+      height: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--muted);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .15s ease, background-color .15s ease;
+    }
+    .week-btn:hover { border-color: var(--line-hover); background: var(--surface-2); }
+    .week-btn__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .week-btn__title {
+      color: var(--text-2);
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 600;
+      line-height: 1.1;
+    }
+    .week-btn__range { display: block; margin-top: 2px; color: var(--dim); font-size: .82rem; }
+    .week-tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: .7rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .week-tag--current { background: rgba(255,255,255,.06); color: var(--muted); }
+    .week-tag--active { display: none; background: var(--blue); color: #fff; }
+    .week-btn[aria-pressed="true"] {
+      border-color: var(--blue);
+      background: linear-gradient(160deg, rgba(46, 123, 255, .24), rgba(46, 123, 255, .06));
+      box-shadow: inset 0 -3px 0 var(--blue);
+    }
+    .week-btn[aria-pressed="true"] .week-btn__title { color: #fff; font-weight: 700; }
+    .week-btn[aria-pressed="true"] .week-btn__range { color: var(--text-2); }
+    .week-btn[aria-pressed="true"] .week-tag--active { display: inline-block; }
+    .week-btn[aria-pressed="true"] .week-tag--current { display: none; }
+    .week-btn:focus-visible, .week-arrow:focus-visible { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
+
+    /* 5. Aktif hafta bandı */
+    .week-info {
+      display: grid;
+      grid-template-columns: auto 1fr minmax(240px, 340px);
+      align-items: center;
+      gap: 18px 32px;
+      margin-top: 16px;
+      padding: 18px 22px;
+    }
+    .week-info__title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .week-info__range { margin: 4px 0 0; color: var(--muted); font-size: .9rem; }
+    .week-facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .week-facts li {
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--bg-2);
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .week-facts strong { margin-right: 4px; color: var(--text); font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; }
+
+    .week-progress__head { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: .82rem; }
+    .week-progress__head strong { color: var(--text); font-weight: 600; }
+    .week-progress__bar {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .seg { height: 8px; border-radius: 3px; background: var(--line); }
+    .seg--Finished  { background: rgba(31, 201, 138, .6); }
+    .seg--Live      { background: var(--green); box-shadow: 0 0 10px rgba(31, 201, 138, .6); }
+    .seg--Postponed { background: var(--amber); }
+    .week-progress__legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; color: var(--dim); font-size: .75rem; }
+    .week-progress__legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .week-progress__legend i { width: 8px; height: 8px; border-radius: 2px; background: var(--line); }
+
+    /* 6. Gün grupları + maç kartı */
+    .fixtures-body { margin-top: 20px; }
+    .fixtures-list { padding: 18px 20px 22px; transition: opacity .18s ease; }
+    .fixtures-list.is-loading { opacity: .35; }
+    .day-group + .day-group { margin-top: 24px; }
+    .day-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 0 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .day-head__date { margin: 0; font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; }
+    .day-head__count { color: var(--dim); font-size: .82rem; }
+    .day-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+
+    .fixture-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr) 92px minmax(0, 1fr) 120px;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--bg-2);
+      transition: border-color .15s ease, background-color .15s ease;
+    }
+    .fixture-card:hover { border-color: var(--line-hover); background: var(--surface-2); }
+    .fixture-card.is-linked { cursor: pointer; }
+
+    .fx-meta { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+    .fx-time { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; line-height: 1; }
+
+    .fx-team { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .fx-team--home { justify-content: flex-end; text-align: right; }
+    .fx-name {
+      overflow: hidden;
+      color: var(--text);
+      font-size: 1.02rem;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .fx-team.is-winner .fx-name { font-weight: 700; color: #fff; }
+    .fx-team.is-loser .fx-name { color: var(--muted); font-weight: 500; }
+
+    .fx-score {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 6px 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .fx-score__sep { width: 8px; height: 3px; border-radius: 2px; background: var(--dim); }
+    .fx-score--empty { color: var(--dim); font-size: 1.1rem; font-weight: 600; padding: 11px 0; }
+
+    .fx-action { justify-self: end; color: var(--dim); font-size: .8rem; text-align: right; }
+    .fx-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--blue-bright);
+      font-size: .85rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .fx-link svg { width: 14px; height: 14px; }
+    .fx-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }  /* tüm kart tıklanabilir */
+    .fx-link:focus-visible { outline: none; }
+    .fixture-card:has(.fx-link:focus-visible) { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
+    .fixture-card:hover .fx-link { text-decoration: underline; }
+
+    /* durum varyantları */
+    .fixture-card--Live {
+      border-color: rgba(31, 201, 138, .45);
+      background: linear-gradient(90deg, rgba(31, 201, 138, .08), var(--bg-2) 45%);
+    }
+    .fixture-card--Live .fx-score { border-color: rgba(31, 201, 138, .5); background: rgba(31, 201, 138, .12); color: #fff; }
+    .fixture-card--Postponed { border-left: 3px solid var(--amber); }
+    .fixture-card--Postponed .fx-time { color: var(--dim); text-decoration: line-through; }
+    .fixture-card--Postponed .fx-name { color: var(--muted); }
+
+    /* 7. Durum rozetleri (matchStatus) */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: .74rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .status--NotStarted { background: rgba(139, 156, 192, .13); color: var(--muted); }
+    .status--Finished   { background: rgba(255, 255, 255, .07); color: var(--text-2); }
+    .status--Live       { background: rgba(31, 201, 138, .15); color: #7FE8BF; }
+    .status--Postponed  { background: rgba(242, 181, 59, .15); color: #F6D07A; }
+    .status--Live::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: live-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes live-pulse { 50% { opacity: .35; } }
+
+    /* 8. Haftanın özeti */
+    .side-stack { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
+    .summary-list { margin: 0; padding: 6px 20px 4px; }
+    .summary-list > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 9px 0; }
+    .summary-list > div + div { border-top: 1px solid var(--line-soft); }
+    .summary-list dt { color: var(--muted); font-size: .9rem; font-weight: 500; }
+    .summary-list dd { margin: 0; font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; line-height: 1; }
+    .result-split { padding: 8px 20px 18px; }
+    .result-split__bar { display: flex; gap: 3px; height: 10px; margin-top: 8px; }
+    .result-split__bar span { border-radius: 4px; min-width: 0; }
+    .result-split__bar .r-home { background: var(--blue); }
+    .result-split__bar .r-draw { background: var(--dim); }
+    .result-split__bar .r-away { background: var(--ice); }
+    .result-split__legend { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; color: var(--dim); font-size: .75rem; }
+    .result-split__legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .result-split__legend i { width: 8px; height: 8px; border-radius: 2px; }
+    .result-split__title { color: var(--muted); font-size: .85rem; }
+    .summary-note { margin: 0; padding: 0 20px 16px; color: var(--dim); font-size: .78rem; }
+
+    /* 9. Öne çıkan maç */
+    .featured { position: relative; overflow: hidden; }
+    .featured::before {
+      content: "";
+      position: absolute;
+      top: -60px; left: 50%;
+      width: 260px; height: 260px;
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .featured__body { position: relative; padding: 20px; text-align: center; }
+    .featured__teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
+    .featured__team { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
+    .featured__team span:last-child { font-weight: 700; font-size: 1.05rem; }
+    .featured__score { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; line-height: 1; }
+    .featured__score--vs { color: var(--dim); font-size: 1.3rem; }
+    .featured__info { display: flex; flex-direction: column; gap: 4px; margin: 16px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line-soft); list-style: none; color: var(--text-2); font-size: .88rem; }
+    .featured__info span { color: var(--dim); }
+    .featured__foot { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 12px; }
+    .featured .fx-link::after { display: none; }
+
+    .page-note { margin: 22px 0 0; color: var(--dim); font-size: .8rem; text-align: center; }
+
+    /* 10. Responsive */
+    @media (max-width: 1199.98px) {
+      .week-info { grid-template-columns: auto 1fr; }
+      .week-progress { grid-column: 1 / -1; }
+    }
+    @media (max-width: 991.98px) {
+      .side-stack { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    }
+    @media (max-width: 767.98px) {
+      .fixtures-shell { padding-block: 16px 48px; }
+      .fixtures-hero { padding: 22px 18px 18px; }
+      .hero-meta { width: 100%; }
+      .hero-meta > div { flex: 1; min-width: 0; padding: 10px 12px; }
+      .week-arrow { width: 40px; }
+      .week-list { gap: 6px; }
+      .week-btn { padding: 10px; }
+      .week-btn { padding: 10px 6px; text-align: center; }
+      .week-btn__top { justify-content: center; }
+      .week-btn__title { font-size: 1.05rem; white-space: nowrap; }
+      .week-btn__range, .week-tag { display: none !important; }
+      .week-info { grid-template-columns: 1fr; padding: 16px; }
+      .fixtures-list { padding: 14px 12px 18px; }
+
+      .fixture-card {
+        grid-template-columns: minmax(0, 1fr) 68px minmax(0, 1fr);
+        grid-template-areas: "meta meta meta" "home score away";
+        gap: 10px 8px;
+        padding: 12px;
+      }
+      .fx-meta { grid-area: meta; flex-direction: row; align-items: center; justify-content: space-between; }
+      .fx-team--home { grid-area: home; flex-direction: column-reverse; align-items: center; text-align: center; gap: 6px; }
+      .fx-team--away { grid-area: away; flex-direction: column; text-align: center; gap: 6px; }
+      .fx-score { grid-area: score; font-size: 1.4rem; }
+      .fx-name { font-size: .92rem; max-width: 100%; }
+      .fx-action { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body class="fixtures-page">
+  <main class="fixtures-shell container-xl" data-fixtures-page data-current-week="12">
+
+    <!-- ===== Partial: _FixturesHero ===== -->
+    <header class="fixtures-hero">
+      <div class="hero-league">
+        <span class="hero-league__name"><span class="league-mark" aria-hidden="true">SA</span>İtalya, Serie A</span>
+        <label class="season-select">
+          <span class="visually-hidden">Sezon</span>
+          <select aria-label="Sezon seç">
+            <option selected>2026/27</option>
+          </select>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </label>
+      </div>
+      <div class="hero-row">
+        <div>
+          <h1 class="hero-title">Serie A Fikstür</h1>
+          <p class="hero-subtitle">Haftayı seç, o haftanın tüm maçlarını gün gün, skor ve durum bilgisiyle gör.</p>
+        </div>
+        <dl class="hero-meta">
+          <div><dt>Takım</dt><dd>20</dd></div>
+          <div><dt>Hafta</dt><dd>38</dd></div>
+          <div><dt>Güncel hafta</dt><dd>12</dd></div>
+        </dl>
+      </div>
+    </header>
+
+    <!-- ===== Partial: _WeekSelector ===== -->
+    <nav class="week-nav" aria-label="Hafta seçici">
+      <button type="button" class="week-arrow" data-week-step="-1" aria-label="Önceki hafta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <ul class="week-list" data-week-list></ul>
+      <button type="button" class="week-arrow" data-week-step="1" aria-label="Sonraki hafta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </nav>
+
+    <!-- ===== Partial: _WeekInfo ===== -->
+    <section class="panel week-info" aria-live="polite" data-week-info></section>
+
+    <div class="fixtures-body">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <!-- ===== Haftanın maçları (her kart: _FixtureCard) ===== -->
+          <section class="panel" aria-labelledby="fixtures-title">
+            <div class="panel__head">
+              <h2 class="panel__title" id="fixtures-title">Haftanın maçları</h2>
+              <span class="panel__sub">Saatler Türkiye saatine göre</span>
+            </div>
+            <div class="fixtures-list" data-fixtures-list></div>
+          </section>
+        </div>
+
+        <aside class="col-lg-4" aria-label="Haftanın özeti ve öne çıkan maç">
+          <div class="side-stack">
+            <!-- ===== Partial: _WeeklySummary ===== -->
+            <section class="panel" aria-labelledby="summary-title" data-weekly-summary></section>
+            <!-- ===== Partial: _FeaturedMatch ===== -->
+            <section class="panel featured" aria-labelledby="featured-title" data-featured-match></section>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <p class="page-note">Sayfadaki veriler demo amaçlıdır.</p>
+  </main>
+
+  <script>
+    /* =============================================================
+       Serie A Fikstür - fixtures.js
+       Veri katmanı (FixtureService) API'ye bağlanmaya hazır; şimdilik demo veri döner.
+       matchStatus değerleri: NotStarted | Live | Finished | Postponed
+       ============================================================= */
+    (function () {
+      'use strict';
+
+      /* ---------- Takımlar (API: /api/teams) ---------- */
+      const TEAMS = {
+        inter:      { name: 'Inter',      code: 'INT', a: '#0A4FA8', b: '#101418', ink: '#fff',    stadium: 'San Siro' },
+        milan:      { name: 'Milan',      code: 'MIL', a: '#C8141E', b: '#111111', ink: '#fff',    stadium: 'San Siro' },
+        juventus:   { name: 'Juventus',   code: 'JUV', a: '#16181D', b: '#E8E8E8', ink: '#fff',    stadium: 'Allianz Stadium' },
+        napoli:     { name: 'Napoli',     code: 'NAP', a: '#1E9BD7', b: '#0C3C78', ink: '#fff',    stadium: 'Stadio Diego Armando Maradona' },
+        roma:       { name: 'Roma',       code: 'ROM', a: '#8E1F2F', b: '#F0B323', ink: '#fff',    stadium: 'Stadio Olimpico' },
+        lazio:      { name: 'Lazio',      code: 'LAZ', a: '#8FD3F4', b: '#FFFFFF', ink: '#0B2A4A', stadium: 'Stadio Olimpico' },
+        atalanta:   { name: 'Atalanta',   code: 'ATA', a: '#1E6FB8', b: '#111111', ink: '#fff',    stadium: 'Gewiss Stadium' },
+        fiorentina: { name: 'Fiorentina', code: 'FIO', a: '#5B2A86', b: '#FFFFFF', ink: '#fff',    stadium: 'Stadio Artemio Franchi' },
+        bologna:    { name: 'Bologna',    code: 'BOL', a: '#1A2F5A', b: '#A21C26', ink: '#fff',    stadium: "Stadio Renato Dall'Ara" },
+        torino:     { name: 'Torino',     code: 'TOR', a: '#7E1B1B', b: '#E9D9B0', ink: '#fff',    stadium: 'Stadio Olimpico Grande Torino' },
+        como:       { name: 'Como',       code: 'COM', a: '#0B3E91', b: '#FFFFFF', ink: '#fff',    stadium: 'Stadio Giuseppe Sinigaglia' },
+        parma:      { name: 'Parma',      code: 'PAR', a: '#FFD200', b: '#1D3E8A', ink: '#10224A', stadium: 'Stadio Ennio Tardini' },
+        udinese:    { name: 'Udinese',    code: 'UDI', a: '#26282C', b: '#FFFFFF', ink: '#fff',    stadium: 'Bluenergy Stadium' },
+        genoa:      { name: 'Genoa',      code: 'GEN', a: '#A2172E', b: '#002B5C', ink: '#fff',    stadium: 'Stadio Luigi Ferraris' },
+        sassuolo:   { name: 'Sassuolo',   code: 'SAS', a: '#00A651', b: '#111111', ink: '#fff',    stadium: 'Mapei Stadium' },
+        cagliari:   { name: 'Cagliari',   code: 'CAG', a: '#A5162B', b: '#0E2A56', ink: '#fff',    stadium: 'Unipol Domus' },
+        lecce:      { name: 'Lecce',      code: 'LEC', a: '#F6D000', b: '#D21F26', ink: '#3A1206', stadium: 'Stadio Via del Mare' },
+        monza:      { name: 'Monza',      code: 'MON', a: '#D2122E', b: '#FFFFFF', ink: '#fff',    stadium: 'U-Power Stadium' },
+        frosinone:  { name: 'Frosinone',  code: 'FRO', a: '#1C4E9A', b: '#FFD200', ink: '#fff',    stadium: 'Stadio Benito Stirpe' },
+        venezia:    { name: 'Venezia',    code: 'VEN', a: '#141414', b: '#F06A1A', ink: '#fff',    stadium: 'Stadio Pier Luigi Penzo' }
+      };
+
+      /* ---------- Hafta bilgisi (API: /api/weeks) ---------- */
+      const WEEKS = {
+        11: { start: '2026-10-31', end: '2026-11-02', featuredId: 131 },
+        12: { start: '2026-11-07', end: '2026-11-09', featuredId: 145 },
+        13: { start: '2026-11-14', end: '2026-11-16', featuredId: 151 }
+      };
+
+      /* ---------- Demo fikstür (API: GET /api/fixtures/week/{week}) ---------- */
+      const m = (id, kickoff, home, away, status, hs = null, as = null, extra = {}) =>
+        ({ id, kickoff, home, away, status, score: hs === null ? null : { home: hs, away: as }, ...extra });
+
+      const fixtures = {
+        11: [
+          m(131, '2026-10-31T18:00', 'roma', 'inter', 'Finished', 1, 2),
+          m(132, '2026-10-31T15:00', 'lazio', 'torino', 'Finished', 1, 1),
+          m(133, '2026-10-31T20:45', 'napoli', 'atalanta', 'Finished', 2, 0),
+          m(134, '2026-11-01T12:30', 'fiorentina', 'juventus', 'Finished', 0, 2),
+          m(135, '2026-11-01T15:00', 'bologna', 'milan', 'Finished', 1, 3),
+          m(136, '2026-11-01T15:00', 'genoa', 'como', 'Finished', 0, 1),
+          m(137, '2026-11-01T18:00', 'parma', 'udinese', 'Finished', 2, 2),
+          m(138, '2026-11-01T20:45', 'cagliari', 'lecce', 'Finished', 1, 0),
+          m(139, '2026-11-02T18:30', 'monza', 'frosinone', 'Finished', 1, 1),
+          m(140, '2026-11-02T20:45', 'venezia', 'sassuolo', 'Finished', 1, 2)
+        ],
+        12: [
+          m(141, '2026-11-07T15:00', 'atalanta', 'lazio', 'Finished', 3, 1),
+          m(142, '2026-11-07T18:00', 'juventus', 'napoli', 'Finished', 1, 1),
+          m(145, '2026-11-07T20:45', 'milan', 'roma', 'Finished', 2, 1),
+          m(143, '2026-11-08T12:30', 'inter', 'fiorentina', 'Finished', 2, 1),
+          m(144, '2026-11-08T15:00', 'torino', 'bologna', 'Live', 1, 0, { minute: 67 }),
+          m(146, '2026-11-08T15:00', 'como', 'parma', 'Live', 2, 0, { minute: 64 }),
+          m(147, '2026-11-08T20:45', 'udinese', 'genoa', 'NotStarted'),
+          m(148, '2026-11-09T18:30', 'sassuolo', 'cagliari', 'NotStarted'),
+          m(149, '2026-11-09T20:45', 'lecce', 'monza', 'Postponed', null, null, { note: 'Yoğun yağış, yeni tarih bekleniyor' }),
+          m(150, '2026-11-09T20:45', 'frosinone', 'venezia', 'NotStarted')
+        ],
+        13: [
+          m(151, '2026-11-14T20:45', 'inter', 'juventus', 'NotStarted'),
+          m(152, '2026-11-14T18:00', 'napoli', 'milan', 'NotStarted'),
+          m(153, '2026-11-14T15:00', 'roma', 'como', 'NotStarted'),
+          m(154, '2026-11-15T12:30', 'lazio', 'bologna', 'NotStarted'),
+          m(155, '2026-11-15T15:00', 'fiorentina', 'atalanta', 'NotStarted'),
+          m(156, '2026-11-15T15:00', 'genoa', 'torino', 'NotStarted'),
+          m(157, '2026-11-15T18:00', 'cagliari', 'udinese', 'NotStarted'),
+          m(158, '2026-11-15T20:45', 'parma', 'lecce', 'NotStarted'),
+          m(159, '2026-11-16T18:30', 'venezia', 'monza', 'NotStarted'),
+          m(160, '2026-11-16T20:45', 'sassuolo', 'frosinone', 'NotStarted')
+        ]
+      };
+
+      /* ---------- Veri servisi ----------
+         Gerçek API'ye geçerken yalnızca bu fonksiyonun gövdesi değişir:
+         return fetch(`/api/fixtures/week/${week}`).then(r => r.json());            */
+      const FixtureService = {
+        getWeek(week) {
+          return Promise.resolve(fixtures[week] ? structuredCloneSafe(fixtures[week]) : []);
+        }
+      };
+      function structuredCloneSafe(v) { return JSON.parse(JSON.stringify(v)); }
+
+      /* ---------- Yardımcılar ---------- */
+      const STATUS_LABEL = { NotStarted: 'Başlamadı', Live: 'Canlı', Finished: 'Maç bitti', Postponed: 'Ertelendi' };
+      const toDate = (s) => new Date(s.length === 10 ? s + 'T00:00' : s);
+      const fmtDay = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
+      const fmtDayMonth = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' });
+      const fmtWeekday = new Intl.DateTimeFormat('tr-TR', { weekday: 'long' });
+      const fmtTime = new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      const dayKey = (iso) => iso.slice(0, 10);
+      const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+      function weekRange(week) {
+        const w = WEEKS[week];
+        const a = toDate(w.start), b = toDate(w.end);
+        return `${fmtDayMonth.format(a)} – ${fmtDayMonth.format(b)} ${b.getFullYear()}`;
+      }
+      function crest(teamId, mod = '') {
+        const t = TEAMS[teamId];
+        return `<span class="team-crest ${mod}" style="--crest-a:${t.a};--crest-b:${t.b};--crest-ink:${t.ink}" aria-hidden="true">${t.code}</span>`;
+      }
+      const hasScore = (f) => f.score && (f.status === 'Finished' || f.status === 'Live');
+      const detailUrl = (f) => `/Match/Detail/${f.id}`;
+      const chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+
+      function statusBadge(f) {
+        const label = f.status === 'Live' ? `Canlı ${f.minute}'` : STATUS_LABEL[f.status];
+        return `<span class="status status--${f.status}">${label}</span>`;
+      }
+
+      /* Haftalık istatistik (ileride API tarafından hesaplanabilir) */
+      function computeSummary(list) {
+        const played = list.filter(hasScore);
+        const finished = list.filter((f) => f.status === 'Finished');
+        const goals = played.reduce((s, f) => s + f.score.home + f.score.away, 0);
+        return {
+          total: list.length,
+          finished: finished.length,
+          live: list.filter((f) => f.status === 'Live').length,
+          notStarted: list.filter((f) => f.status === 'NotStarted').length,
+          postponed: list.filter((f) => f.status === 'Postponed').length,
+          goals,
+          avgGoals: played.length ? (goals / played.length) : 0,
+          draws: finished.filter((f) => f.score.home === f.score.away).length,
+          homeWins: finished.filter((f) => f.score.home > f.score.away).length,
+          awayWins: finished.filter((f) => f.score.home < f.score.away).length
+        };
+      }
+
+      /* ---------- Render: _FixtureCard ---------- */
+      function fixtureCard(f) {
+        const home = TEAMS[f.home], away = TEAMS[f.away];
+        let homeCls = '', awayCls = '';
+        if (f.status === 'Finished' && f.score.home !== f.score.away) {
+          const homeWon = f.score.home > f.score.away;
+          homeCls = homeWon ? 'is-winner' : 'is-loser';
+          awayCls = homeWon ? 'is-loser' : 'is-winner';
+        }
+        const score = hasScore(f)
+          ? `<div class="fx-score" aria-label="Skor ${f.score.home}-${f.score.away}"><span>${f.score.home}</span><span class="fx-score__sep" aria-hidden="true"></span><span>${f.score.away}</span></div>`
+          : `<div class="fx-score fx-score--empty" aria-label="Skor yok">-</div>`;
+
+        let action = `<span>${esc(home.stadium)}</span>`;
+        if (f.status === 'Finished') action = `<a class="fx-link" href="${detailUrl(f)}">Maç detayı${chevron}</a>`;
+        if (f.status === 'Live') action = `<a class="fx-link" href="${detailUrl(f)}">Canlı takip${chevron}</a>`;
+        if (f.status === 'Postponed') action = `<span>${esc(f.note || 'Yeni tarih bekleniyor')}</span>`;
+        const linked = f.status === 'Finished' || f.status === 'Live';
+
+        return `
+          <li>
+            <article class="fixture-card fixture-card--${f.status}${linked ? ' is-linked' : ''}" data-match-id="${f.id}" data-match-status="${f.status}">
+              <div class="fx-meta">
+                <time class="fx-time" datetime="${f.kickoff}">${fmtTime.format(toDate(f.kickoff))}</time>
+                ${statusBadge(f)}
+              </div>
+              <div class="fx-team fx-team--home ${homeCls}"><span class="fx-name">${esc(home.name)}</span>${crest(f.home)}</div>
+              ${score}
+              <div class="fx-team fx-team--away ${awayCls}">${crest(f.away)}<span class="fx-name">${esc(away.name)}</span></div>
+              <div class="fx-action">${action}</div>
+            </article>
+          </li>`;
+      }
+
+      function renderFixtures(list) {
+        const groups = new Map();
+        list.slice()
+          .sort((a, b) => a.kickoff.localeCompare(b.kickoff) || a.id - b.id)
+          .forEach((f) => {
+            const k = dayKey(f.kickoff);
+            if (!groups.has(k)) groups.set(k, []);
+            groups.get(k).push(f);
+          });
+
+        if (!list.length) {
+          els.list.innerHTML = '<p class="page-note">Bu hafta için henüz fikstür yayımlanmadı.</p>';
+          return;
+        }
+        els.list.innerHTML = Array.from(groups.entries()).map(([k, items]) => `
+          <section class="day-group" aria-label="${fmtDay.format(toDate(k))}">
+            <div class="day-head">
+              <h3 class="day-head__date">${fmtDay.format(toDate(k))}</h3>
+              <span class="day-head__count">${items.length} maç</span>
+            </div>
+            <ul class="day-list">${items.map(fixtureCard).join('')}</ul>
+          </section>`).join('');
+      }
+
+      /* ---------- Render: _WeekSelector ---------- */
+      function renderWeekSelector() {
+        const current = Number(els.page.dataset.currentWeek);
+        els.weekList.innerHTML = Object.keys(WEEKS).map((w) => `
+          <li>
+            <button type="button" class="week-btn" data-week="${w}" aria-pressed="false">
+              <span class="week-btn__top">
+                <span class="week-btn__title">${w}. Hafta</span>
+                ${Number(w) === current ? '<span class="week-tag week-tag--current">Güncel</span>' : ''}
+                <span class="week-tag week-tag--active">Aktif hafta</span>
+              </span>
+              <span class="week-btn__range">${weekRange(w)}</span>
+            </button>
+          </li>`).join('');
+      }
+
+      function syncWeekSelector(week) {
+        els.weekList.querySelectorAll('[data-week]').forEach((b) =>
+          b.setAttribute('aria-pressed', String(Number(b.dataset.week) === week)));
+        const keys = Object.keys(WEEKS).map(Number);
+        els.prev.disabled = week <= Math.min(...keys);
+        els.next.disabled = week >= Math.max(...keys);
+      }
+
+      /* ---------- Render: _WeekInfo ---------- */
+      function renderWeekInfo(week, list, s) {
+        const ordered = list.slice().sort((a, b) => a.kickoff.localeCompare(b.kickoff) || a.id - b.id);
+        const doneText = s.finished === s.total ? 'Hafta tamamlandı' : `${s.finished} / ${s.total} maç tamamlandı`;
+        els.info.innerHTML = `
+          <div>
+            <h2 class="week-info__title">${week}. Hafta</h2>
+            <p class="week-info__range">${weekRange(week)}</p>
+          </div>
+          <ul class="week-facts">
+            <li><strong>${s.total}</strong>maç</li>
+            <li><strong>20</strong>takım</li>
+            <li><strong>${s.goals}</strong>gol</li>
+            ${s.live ? `<li><strong>${s.live}</strong>canlı</li>` : ''}
+          </ul>
+          <div class="week-progress">
+            <div class="week-progress__head"><span>Hafta ilerlemesi</span><strong>${doneText}</strong></div>
+            <div class="week-progress__bar" aria-hidden="true">
+              ${ordered.map((f) => `<span class="seg seg--${f.status}" title="${TEAMS[f.home].name} - ${TEAMS[f.away].name}: ${STATUS_LABEL[f.status]}"></span>`).join('')}
+            </div>
+            <div class="week-progress__legend" aria-hidden="true">
+              <span><i style="background:rgba(31,201,138,.6)"></i>Bitti</span>
+              <span><i style="background:var(--green)"></i>Canlı</span>
+              <span><i></i>Başlamadı</span>
+              <span><i style="background:var(--amber)"></i>Ertelendi</span>
+            </div>
+          </div>`;
+      }
+
+      /* ---------- Render: _WeeklySummary ---------- */
+      function renderSummary(week, s) {
+        const decided = s.homeWins + s.draws + s.awayWins;
+        const avg = s.avgGoals.toFixed(2).replace('.', ',');
+        els.summary.innerHTML = `
+          <div class="panel__head"><h2 class="panel__title" id="summary-title">${week}. Hafta özeti</h2></div>
+          <dl class="summary-list">
+            <div><dt>Maç</dt><dd>${s.total}</dd></div>
+            <div><dt>Tamamlanan</dt><dd>${s.finished}</dd></div>
+            <div><dt>Gol</dt><dd>${s.goals}</dd></div>
+            <div><dt>Maç başına gol</dt><dd>${avg}</dd></div>
+            <div><dt>Beraberlik</dt><dd>${s.draws}</dd></div>
+            <div><dt>Ev sahibi galibiyeti</dt><dd>${s.homeWins}</dd></div>
+            <div><dt>Deplasman galibiyeti</dt><dd>${s.awayWins}</dd></div>
+          </dl>
+          <div class="result-split">
+            <span class="result-split__title">Sonuç dağılımı</span>
+            ${decided ? `
+            <div class="result-split__bar" aria-hidden="true">
+              <span class="r-home" style="flex:${s.homeWins}"></span>
+              <span class="r-draw" style="flex:${s.draws}"></span>
+              <span class="r-away" style="flex:${s.awayWins}"></span>
+            </div>
+            <div class="result-split__legend">
+              <span><i style="background:var(--blue)"></i>Ev ${s.homeWins}</span>
+              <span><i style="background:var(--dim)"></i>Beraberlik ${s.draws}</span>
+              <span><i style="background:var(--ice)"></i>Deplasman ${s.awayWins}</span>
+            </div>` : '<div class="result-split__legend"><span>Henüz tamamlanan maç yok</span></div>'}
+          </div>
+          <p class="summary-note">Gol sayısına canlı maçlar dahildir, sonuçlar yalnızca biten maçlardan hesaplanır.</p>`;
+      }
+
+      /* ---------- Render: _FeaturedMatch ---------- */
+      function renderFeatured(week, list) {
+        const f = list.find((x) => x.id === WEEKS[week].featuredId) || list[0];
+        if (!f) { els.featured.innerHTML = ''; return; }
+        const home = TEAMS[f.home], away = TEAMS[f.away];
+        const d = toDate(f.kickoff);
+        const center = hasScore(f)
+          ? `<span class="featured__score">${f.score.home}-${f.score.away}</span>`
+          : `<span class="featured__score featured__score--vs">vs</span>`;
+        const link = (f.status === 'Finished' || f.status === 'Live')
+          ? `<a class="fx-link" href="${detailUrl(f)}">Maç detayı${chevron}</a>` : '';
+        els.featured.innerHTML = `
+          <div class="panel__head"><h2 class="panel__title" id="featured-title">Haftanın öne çıkan maçı</h2></div>
+          <div class="featured__body">
+            <div class="featured__teams">
+              <div class="featured__team">${crest(f.home, 'team-crest--lg')}<span>${esc(home.name)}</span></div>
+              ${center}
+              <div class="featured__team">${crest(f.away, 'team-crest--lg')}<span>${esc(away.name)}</span></div>
+            </div>
+            <ul class="featured__info">
+              <li>${esc(home.stadium)}</li>
+              <li><span>${fmtWeekday.format(d)}, ${fmtDayMonth.format(d)}</span> ${fmtTime.format(d)}</li>
+            </ul>
+            <div class="featured__foot">${statusBadge(f)}${link}</div>
+          </div>`;
+      }
+
+      /* ---------- Akış ---------- */
+      const els = {
+        page: document.querySelector('[data-fixtures-page]'),
+        weekList: document.querySelector('[data-week-list]'),
+        prev: document.querySelector('[data-week-step="-1"]'),
+        next: document.querySelector('[data-week-step="1"]'),
+        info: document.querySelector('[data-week-info]'),
+        list: document.querySelector('[data-fixtures-list]'),
+        summary: document.querySelector('[data-weekly-summary]'),
+        featured: document.querySelector('[data-featured-match]')
+      };
+      let activeWeek = null;
+      let requestId = 0;
+
+      async function loadWeek(week) {
+        if (!WEEKS[week] || week === activeWeek) return;
+        activeWeek = week;
+        syncWeekSelector(week);
+        els.list.classList.add('is-loading');
+
+        const myRequest = ++requestId;
+        const list = await FixtureService.getWeek(week);
+        if (myRequest !== requestId) return;   // hızlı tıklamalarda eski yanıtı yok say
+
+        const s = computeSummary(list);
+        renderWeekInfo(week, list, s);
+        renderFixtures(list);
+        renderSummary(week, s);
+        renderFeatured(week, list);
+        els.list.classList.remove('is-loading');
+
+        try { history.replaceState(null, '', `?hafta=${week}`); } catch (e) { /* file:// */ }
+      }
+
+      /* Olaylar */
+      els.weekList.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-week]');
+        if (btn) loadWeek(Number(btn.dataset.week));
+      });
+      els.weekList.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        const step = e.key === 'ArrowLeft' ? -1 : 1;
+        const target = activeWeek + step;
+        if (!WEEKS[target]) return;
+        loadWeek(target);
+        els.weekList.querySelector(`[data-week="${target}"]`).focus();
+      });
+      [els.prev, els.next].forEach((btn) =>
+        btn.addEventListener('click', () => loadWeek(activeWeek + Number(btn.dataset.weekStep))));
+      els.list.addEventListener('click', (e) => {
+        // kartın boş alanına tıklanınca bağlantıyı aç (ileride /Match/Detail/{id})
+        if (e.target.closest('a')) return;
+        const card = e.target.closest('.fixture-card.is-linked');
+        const link = card && card.querySelector('.fx-link');
+        if (link) link.click();
+      });
+
+      /* Başlangıç: URL'de ?hafta= varsa onu, yoksa güncel haftayı aç */
+      renderWeekSelector();
+      const fromUrl = Number(new URLSearchParams(location.search).get('hafta'));
+      loadWeek(WEEKS[fromUrl] ? fromUrl : Number(els.page.dataset.currentWeek));
+    })();
+  </script>
+</body>
+</html>

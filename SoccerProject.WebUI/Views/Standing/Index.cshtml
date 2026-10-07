@@ -1,0 +1,305 @@
+@model StandingsViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Serie A Puan Durumu";
+
+    var leader = Model.Rows.FirstOrDefault();
+    var topScorer = Model.Rows.OrderByDescending(r => r.GoalsFor).FirstOrDefault();
+    var bestDef = Model.Rows.OrderBy(r => r.GoalsAgainst).FirstOrDefault();
+    var relStart = Model.Rows.FirstOrDefault(r => r.Zone == "rel");
+
+    int FormPts(StandingRowViewModel r) => r.Form.Count(x => x == "G") * 3 + r.Form.Count(x => x == "B");
+    var formLeaders = Model.Rows.OrderByDescending(FormPts).ThenByDescending(r => r.Points).Take(3).ToList();
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <style>
+        :root {
+            --bg:#070F1F; --bg-2:#0B1730; --surface:#0F1D38; --surface-2:#142647;
+            --line:#1F3358; --line-soft:rgba(31,51,88,.6);
+            --text:#E9F0FB; --text-2:#C4D0E6; --muted:#8B9CC0; --dim:#6A7DA3;
+            --blue:#2E7BFF; --blue-bright:#5B9BFF; --blue-soft:rgba(46,123,255,.14);
+            --green:#1FC98A; --amber:#F2B53B; --red:#F2475C; --draw:#6B7A98;
+            --radius-lg:20px; --radius-md:14px; --radius-sm:10px;
+            --font-display:"Barlow Condensed","Arial Narrow",sans-serif;
+            --font-body:"Barlow","Segoe UI",system-ui,sans-serif;
+        }
+        body.standings-page { min-height:100vh; margin:0; background-color:var(--bg);
+            background-image:radial-gradient(1100px 480px at 12% -8%, rgba(46,123,255,.20), transparent 62%),radial-gradient(800px 380px at 100% 0%, rgba(46,123,255,.08), transparent 60%);
+            background-repeat:no-repeat; color:var(--text); font-family:var(--font-body); font-size:16px; line-height:1.5; font-variant-numeric:tabular-nums; }
+        .standings-shell { padding-block:32px 72px; }
+        a { text-decoration:none; }
+        .top-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+        .top-bar a { padding:8px 14px; border:1px solid var(--line); border-radius:999px; color:var(--text-2); font-size:.85rem; font-weight:600; }
+        .top-bar a:hover { border-color:var(--blue); color:#fff; }
+        .team-crest { --size:32px; flex:none; display:inline-grid; place-items:center; width:var(--size); height:var(--size);
+            border-radius:50%; background:linear-gradient(180deg,var(--crest-a) 0 70%,var(--crest-b) 70% 100%); color:var(--crest-ink,#fff);
+            font-family:var(--font-display); font-size:calc(var(--size)*.34); font-weight:700; line-height:1; padding-bottom:calc(var(--size)*.12); box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.16); }
+        .team-crest--sm { --size:28px; }
+        .standings-hero { position:relative; overflow:hidden; padding:30px 32px 22px; border:1px solid var(--line); border-radius:var(--radius-lg); background:linear-gradient(160deg,#112552 0%,#0B1834 55%,#09142A 100%); }
+        .standings-hero::after { content:""; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,var(--blue) 0%,var(--blue-bright) 30%,transparent 75%); }
+        .standings-hero > * { position:relative; }
+        .hero-top { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:24px; }
+        .hero-league { display:flex; align-items:center; gap:10px; margin-bottom:10px; color:var(--muted); font-weight:500; }
+        .league-mark { display:grid; place-items:center; width:30px; height:30px; border-radius:9px; background:linear-gradient(145deg,var(--blue-bright),var(--blue)); color:#fff; font-family:var(--font-display); font-size:.95rem; font-weight:700; box-shadow:0 6px 18px rgba(46,123,255,.35); }
+        .hero-title { margin:0; font-family:var(--font-display); font-size:clamp(2.5rem,5.2vw,4rem); font-weight:700; line-height:.95; }
+        .hero-subtitle { max-width:54ch; margin:12px 0 0; color:var(--muted); }
+        .hero-meta { display:flex; gap:10px; margin:0; }
+        .hero-meta > div { min-width:100px; padding:10px 16px; border:1px solid var(--line); border-radius:var(--radius-sm); background:rgba(255,255,255,.035); }
+        .hero-meta dt { color:var(--muted); font-size:.8rem; font-weight:500; }
+        .hero-meta dd { margin:0; font-family:var(--font-display); font-size:1.65rem; font-weight:600; line-height:1.1; }
+        .summary-section { margin-top:20px; }
+        .stat-card { --accent:var(--blue-bright); position:relative; display:flex; align-items:flex-start; gap:14px; height:100%; padding:18px 18px 16px 20px; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--surface); }
+        .stat-card::before { content:""; position:absolute; top:18px; bottom:18px; left:0; width:3px; border-radius:0 3px 3px 0; background:var(--accent); }
+        .stat-card--leader { --accent:var(--blue-bright); }
+        .stat-card--attack { --accent:var(--green); }
+        .stat-card--defence { --accent:var(--amber); }
+        .stat-card--danger { --accent:var(--red); }
+        .stat-card__body { flex:1; min-width:0; }
+        .stat-card__label { margin:0; color:var(--muted); font-size:.85rem; }
+        .stat-card__team { display:flex; align-items:center; gap:8px; margin:6px 0 4px; font-size:1.05rem; font-weight:600; white-space:nowrap; }
+        .stat-card__note { margin:0; color:var(--dim); font-size:.8rem; }
+        .stat-card__value { flex:none; text-align:right; font-family:var(--font-display); font-size:2rem; font-weight:700; line-height:1; }
+        .stat-card__value small { display:block; margin-top:4px; color:var(--muted); font-family:var(--font-body); font-size:.72rem; font-weight:500; }
+        .standings-body { margin-top:20px; }
+        .table-panel { overflow:hidden; border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--surface); }
+        .table-toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; border-bottom:1px solid var(--line); }
+        .table-toolbar__title { margin:0; font-family:var(--font-display); font-size:1.4rem; font-weight:600; }
+        .standings-table-wrap { overflow-x:auto; }
+        .standings-table { width:100%; min-width:780px; margin:0; border-collapse:separate; border-spacing:0; }
+        .standings-table thead th { padding:12px 10px; border-bottom:1px solid var(--line); background:var(--surface); color:var(--dim); font-size:.8rem; font-weight:600; text-align:center; white-space:nowrap; }
+        .standings-table abbr { text-decoration:none; cursor:help; }
+        .standings-table tbody th, .standings-table tbody td { padding:13px 10px; border-bottom:1px solid var(--line-soft); color:var(--text-2); font-size:.95rem; font-weight:400; text-align:center; vertical-align:middle; }
+        .standings-table tbody tr:last-child > * { border-bottom:0; }
+        .standings-table .col-pos { position:relative; width:58px; padding-left:18px; color:var(--text); font-family:var(--font-display); font-size:1.2rem; font-weight:600; }
+        .standings-table thead .col-pos { font-family:var(--font-body); font-size:.8rem; color:var(--dim); }
+        .standings-table .col-team { min-width:210px; text-align:left; }
+        .standings-table .col-num { width:52px; }
+        .standings-table .col-gd { width:60px; }
+        .standings-table .col-pts { width:76px; }
+        .standings-table .col-form { width:180px; }
+        .standings-row { --zone:transparent; --tint:transparent; }
+        .standings-row .col-pos::before { content:""; position:absolute; top:9px; bottom:9px; left:0; width:4px; border-radius:0 4px 4px 0; background:var(--zone); }
+        .standings-row.zone-ucl { --zone:var(--blue); --tint:rgba(46,123,255,.10); }
+        .standings-row.zone-europe { --zone:var(--green); --tint:rgba(31,201,138,.08); }
+        .standings-row.zone-rel { --zone:var(--red); --tint:rgba(242,71,92,.10); }
+        .standings-row > .col-pos { background-image:linear-gradient(var(--tint),var(--tint)); }
+        .standings-row > .col-team { background-image:linear-gradient(90deg,var(--tint),transparent 85%); }
+        .team-cell { display:flex; align-items:center; gap:12px; }
+        .team-name { color:var(--text); font-size:1rem; font-weight:600; }
+        .gd { font-weight:600; }
+        .gd.is-pos { color:var(--green); } .gd.is-neg { color:var(--red); } .gd.is-zero { color:var(--muted); }
+        .standings-table thead .col-pts { color:var(--blue-bright); }
+        .standings-table tbody .col-pts { background-color:rgba(46,123,255,.10); color:#fff; font-family:var(--font-display); font-size:1.5rem; font-weight:700; line-height:1; }
+        .standings-row:hover > * { background-color:rgba(91,155,255,.06); }
+        .form-list { display:inline-flex; align-items:center; gap:6px; margin:0; padding:0; list-style:none; }
+        .form-badge { --c:var(--draw); display:grid; place-items:center; width:24px; height:24px; border-radius:50%; background:var(--c); color:#fff; font-size:.7rem; font-weight:700; line-height:1; }
+        .form-badge--w { --c:var(--green); color:#032619; }
+        .form-badge--d { --c:var(--draw); }
+        .form-badge--l { --c:var(--red); }
+        .table-foot { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; padding:12px 20px; border-top:1px solid var(--line); color:var(--dim); font-size:.82rem; }
+        .table-foot strong { color:var(--text-2); font-weight:600; }
+        .side-stack { position:sticky; top:20px; display:flex; flex-direction:column; gap:16px; }
+        .side-card { padding:18px 20px; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--surface); }
+        .side-card__title { margin:0 0 12px; font-family:var(--font-display); font-size:1.3rem; font-weight:600; }
+        .side-card p { margin:0; color:var(--muted); font-size:.9rem; }
+        .legend-list, .form-key, .form-leaders { margin:0; padding:0; list-style:none; }
+        .legend-list li { display:flex; align-items:center; gap:12px; padding:8px 0; }
+        .legend-list li + li { border-top:1px solid var(--line-soft); }
+        .legend-swatch { flex:none; width:4px; height:30px; border-radius:4px; background:var(--swatch); }
+        .legend-list strong { display:block; color:var(--text); font-size:.95rem; font-weight:600; line-height:1.2; }
+        .legend-list span { color:var(--dim); font-size:.8rem; }
+        .form-key { display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft); color:var(--muted); font-size:.82rem; }
+        .form-key li { display:flex; align-items:center; gap:6px; }
+        .form-key .form-badge { width:20px; height:20px; font-size:.62rem; }
+        .form-leaders li { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:6px 10px; padding:9px 0; }
+        .form-leaders li + li { border-top:1px solid var(--line-soft); }
+        .form-leaders .team-name { font-size:.95rem; }
+        .form-leaders__pts { font-family:var(--font-display); font-size:1.2rem; font-weight:700; }
+        .form-leaders__pts small { color:var(--dim); font-family:var(--font-body); font-size:.72rem; font-weight:500; }
+        @@media (max-width: 1199.98px) { .side-stack { position:static; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); } }
+        @@media (max-width: 767.98px) { .standings-table .col-hide-sm { display:none; } }
+    </style>
+</head>
+<body class="standings-page">
+    <main class="standings-shell container-xl">
+
+        <div class="top-bar">
+            <a href="/Fixture">Fikstür</a>
+            <a href="/Standing">Puan Durumu</a>
+            <a href="/Players">Futbolcular</a>
+            <a href="/Players/TopScorers">Gol Krallığı</a>
+            <a href="/Stadiums">Stadyumlar</a>
+            <a href="/Match">Maç Sonuçları</a>
+        </div>
+
+        <!-- _StandingsHero -->
+        <header class="standings-hero">
+            <div class="hero-top">
+                <div>
+                    <div class="hero-league"><span class="league-mark" aria-hidden="true">SA</span>İtalya, Serie A</div>
+                    <h1 class="hero-title">Serie A Puan Durumu</h1>
+                    <p class="hero-subtitle">Güncel sıralama, gol dengesi ve son 5 maçlık form durumu (biten maçlardan hesaplanır).</p>
+                </div>
+                <dl class="hero-meta">
+                    <div><dt>Sezon</dt><dd>@Model.Season</dd></div>
+                    <div><dt>Hafta</dt><dd>@Model.Week</dd></div>
+                    <div><dt>Takım sayısı</dt><dd>@Model.TeamCount</dd></div>
+                </dl>
+            </div>
+        </header>
+
+        <!-- _SummaryCards -->
+        <section class="summary-section">
+            <div class="row g-3">
+                <div class="col-sm-6 col-xl-3">
+                    <article class="stat-card stat-card--leader">
+                        <div class="stat-card__body">
+                            <p class="stat-card__label">Lider</p>
+                            <p class="stat-card__team">
+                                @if (leader != null)
+                                {
+                                    <span class="team-crest team-crest--sm" style="@TeamVisual.Style(leader.TeamName)" aria-hidden="true">@TeamVisual.Code(leader.TeamName)</span>
+                                    @leader.TeamName
+                                }
+                            </p>
+                            <p class="stat-card__note">@(leader != null ? $"{leader.Played} maç" : "-")</p>
+                        </div>
+                        <p class="stat-card__value">@(leader?.Points ?? 0)<small>puan</small></p>
+                    </article>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <article class="stat-card stat-card--attack">
+                        <div class="stat-card__body">
+                            <p class="stat-card__label">En çok gol atan</p>
+                            <p class="stat-card__team">
+                                @if (topScorer != null)
+                                {
+                                    <span class="team-crest team-crest--sm" style="@TeamVisual.Style(topScorer.TeamName)" aria-hidden="true">@TeamVisual.Code(topScorer.TeamName)</span>
+                                    @topScorer.TeamName
+                                }
+                            </p>
+                            <p class="stat-card__note">Attığı gol</p>
+                        </div>
+                        <p class="stat-card__value">@(topScorer?.GoalsFor ?? 0)<small>gol</small></p>
+                    </article>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <article class="stat-card stat-card--defence">
+                        <div class="stat-card__body">
+                            <p class="stat-card__label">En az gol yiyen</p>
+                            <p class="stat-card__team">
+                                @if (bestDef != null)
+                                {
+                                    <span class="team-crest team-crest--sm" style="@TeamVisual.Style(bestDef.TeamName)" aria-hidden="true">@TeamVisual.Code(bestDef.TeamName)</span>
+                                    @bestDef.TeamName
+                                }
+                            </p>
+                            <p class="stat-card__note">Yediği gol</p>
+                        </div>
+                        <p class="stat-card__value">@(bestDef?.GoalsAgainst ?? 0)<small>gol</small></p>
+                    </article>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <article class="stat-card stat-card--danger">
+                        <div class="stat-card__body">
+                            <p class="stat-card__label">Düşme hattı başlangıcı</p>
+                            <p class="stat-card__team">
+                                @if (relStart != null)
+                                {
+                                    <span class="team-crest team-crest--sm" style="@TeamVisual.Style(relStart.TeamName)" aria-hidden="true">@TeamVisual.Code(relStart.TeamName)</span>
+                                    @relStart.TeamName
+                                }
+                            </p>
+                            <p class="stat-card__note">@(relStart != null ? $"{relStart.Points} puan" : "-")</p>
+                        </div>
+                        <p class="stat-card__value">@(relStart?.Position ?? 0).<small>sıra</small></p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <div class="standings-body">
+            <div class="row g-4">
+                <div class="col-xl-9">
+                    <!-- _StandingsTable -->
+                    <section class="table-panel">
+                        <div class="table-toolbar">
+                            <h2 class="table-toolbar__title">Genel sıralama</h2>
+                        </div>
+                        <div class="standings-table-wrap">
+                            <table class="standings-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-pos">#</th>
+                                        <th class="col-team">Takım</th>
+                                        <th class="col-num"><abbr title="Oynanan maç">O</abbr></th>
+                                        <th class="col-num"><abbr title="Galibiyet">G</abbr></th>
+                                        <th class="col-num"><abbr title="Beraberlik">B</abbr></th>
+                                        <th class="col-num"><abbr title="Mağlubiyet">M</abbr></th>
+                                        <th class="col-num col-hide-sm"><abbr title="Atılan gol">AG</abbr></th>
+                                        <th class="col-num col-hide-sm"><abbr title="Yenilen gol">YG</abbr></th>
+                                        <th class="col-gd"><abbr title="Averaj">AV</abbr></th>
+                                        <th class="col-pts">Puan</th>
+                                        <th class="col-form">Son 5 maç</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var row in Model.Rows)
+                                    {
+                                        <partial name="_StandingsRow" model="row" />
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-foot">
+                            <span>Takım: <strong>@Model.TeamCount</strong></span>
+                            <span>Kaynak: SoccerProject.WebAPI</span>
+                        </div>
+                    </section>
+                </div>
+
+                <aside class="col-xl-3">
+                    <div class="side-stack">
+                        <section class="side-card">
+                            <h2 class="side-card__title">Renklerin anlamı</h2>
+                            <ul class="legend-list">
+                                <li><span class="legend-swatch" style="--swatch:var(--blue)"></span><div><strong>Şampiyonlar Ligi</strong><span>1-4. sıra</span></div></li>
+                                <li><span class="legend-swatch" style="--swatch:var(--green)"></span><div><strong>Avrupa kupaları</strong><span>5-6. sıra</span></div></li>
+                                <li><span class="legend-swatch" style="--swatch:var(--red)"></span><div><strong>Düşme hattı</strong><span>Son 3 sıra</span></div></li>
+                            </ul>
+                            <ul class="form-key">
+                                <li><span class="form-badge form-badge--w">G</span>Galibiyet</li>
+                                <li><span class="form-badge form-badge--d">B</span>Beraberlik</li>
+                                <li><span class="form-badge form-badge--l">M</span>Mağlubiyet</li>
+                            </ul>
+                        </section>
+
+                        <section class="side-card">
+                            <h2 class="side-card__title">Formda olanlar</h2>
+                            <p>Son 5 maçta toplanan puan</p>
+                            <ol class="form-leaders">
+                                @foreach (var fl in formLeaders)
+                                {
+                                    int fp = FormPts(fl);
+                                    <li>
+                                        <span class="team-crest team-crest--sm" style="@TeamVisual.Style(fl.TeamName)" aria-hidden="true">@TeamVisual.Code(fl.TeamName)</span>
+                                        <span class="team-name">@fl.TeamName</span>
+                                        <span class="form-leaders__pts">@fp <small>/ @(fl.Form.Count * 3)</small></span>
+                                    </li>
+                                }
+                            </ol>
+                        </section>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,142 @@
+@model GetByIdPlayerDto
+@{
+    Layout = null;
+    ViewData["Title"] = Model.FullName;
+    string Nat = string.IsNullOrWhiteSpace(Model.Nationality) ? "—" : Model.Nationality;
+    string Birth = Model.BirthDate.HasValue ? Model.BirthDate.Value.ToString("dd.MM.yyyy") : "—";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <style>
+        :root {
+            --bg:#070F1F; --surface:#0F1D38; --surface-2:#142647; --line:#1F3358; --line-soft:rgba(31,51,88,.6);
+            --text:#E9F0FB; --text-2:#C4D0E6; --muted:#8B9CC0; --dim:#6A7DA3;
+            --blue:#2E7BFF; --blue-bright:#5B9BFF; --green:#1FC98A; --amber:#F2B53B; --red:#F2475C;
+            --radius-lg:20px; --radius-md:14px; --radius-sm:10px;
+            --font-display:"Barlow Condensed","Arial Narrow",sans-serif;
+            --font-body:"Barlow","Segoe UI",system-ui,sans-serif;
+        }
+        body.player-page { min-height:100vh; margin:0; background-color:var(--bg);
+            background-image:radial-gradient(1100px 480px at 50% -10%, rgba(46,123,255,.20), transparent 62%);
+            background-repeat:no-repeat; color:var(--text); font-family:var(--font-body); }
+        a { text-decoration:none; color:inherit; }
+        .shell { padding-block:28px 72px; }
+        .top-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+        .top-bar a { padding:8px 14px; border:1px solid var(--line); border-radius:999px; color:var(--text-2); font-size:.85rem; font-weight:600; }
+        .top-bar a:hover { border-color:var(--blue); color:#fff; }
+        .back-link { display:inline-flex; align-items:center; gap:6px; margin-bottom:16px; color:var(--blue-bright); font-weight:600; font-size:.9rem; }
+        .profile-hero { position:relative; overflow:hidden; display:flex; flex-wrap:wrap; align-items:center; gap:26px; padding:30px 34px; border:1px solid var(--line); border-radius:var(--radius-lg); background:linear-gradient(160deg,#112552 0%,#0B1834 55%,#09142A 100%); }
+        .profile-hero::after { content:""; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,var(--blue),var(--blue-bright) 30%,transparent 75%); }
+        .profile-hero > * { position:relative; }
+        .avatar-xl { position:relative; flex:none; width:132px; height:132px; border-radius:50%; overflow:hidden; background:var(--surface-2); box-shadow:inset 0 0 0 2px var(--line), 0 10px 30px rgba(0,0,0,.35); }
+        .avatar-xl img { width:100%; height:100%; object-fit:cover; display:block; }
+        .avatar-xl .fallback { width:100%; height:100%; display:grid; place-items:center; font-family:var(--font-display); font-size:2.8rem; font-weight:700; color:#fff; background:linear-gradient(180deg,var(--crest-a) 0 70%,var(--crest-b) 70% 100%); }
+        .profile-id { min-width:260px; }
+        .profile-team { display:inline-flex; align-items:center; gap:10px; margin-bottom:8px; color:var(--text-2); font-weight:600; }
+        .team-crest { --size:30px; flex:none; display:inline-grid; place-items:center; width:var(--size); height:var(--size);
+            border-radius:50%; background:linear-gradient(180deg,var(--crest-a) 0 70%,var(--crest-b) 70% 100%); color:var(--crest-ink,#fff);
+            font-family:var(--font-display); font-size:calc(var(--size)*.32); font-weight:700; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.16); }
+        .profile-name { margin:0; font-family:var(--font-display); font-size:clamp(2.3rem,5vw,3.4rem); font-weight:700; line-height:.98; }
+        .profile-sub { margin:6px 0 0; color:var(--muted); }
+        .shirt-badge { display:inline-grid; place-items:center; min-width:34px; height:34px; padding:0 8px; border-radius:9px; background:var(--blue); color:#fff; font-family:var(--font-display); font-size:1.2rem; font-weight:700; }
+        .info-grid { margin-top:22px; }
+        .info-card { height:100%; padding:18px 20px; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--surface); }
+        .info-card dt { color:var(--muted); font-size:.82rem; font-weight:500; margin-bottom:4px; }
+        .info-card dd { margin:0; font-family:var(--font-display); font-size:1.5rem; font-weight:600; }
+        .section-title { margin:30px 0 14px; font-family:var(--font-display); font-size:1.5rem; font-weight:600; }
+        .career-panel { padding:8px 22px; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--surface); }
+        .career-list { margin:0; padding:0; list-style:none; }
+        .career-list li { display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid var(--line-soft); }
+        .career-list li:last-child { border-bottom:0; }
+        .career-years { flex:none; width:120px; font-family:var(--font-display); font-size:1.15rem; font-weight:600; color:var(--blue-bright); }
+        .career-club { color:var(--text); font-weight:600; font-size:1.05rem; }
+        .badge-now { margin-left:8px; padding:2px 8px; border-radius:999px; background:rgba(31,201,138,.15); color:var(--green); font-size:.72rem; font-weight:700; vertical-align:middle; }
+        .empty { color:var(--muted); padding:16px 0; }
+    </style>
+</head>
+<body class="player-page">
+    <main class="shell container-xl">
+        <div class="top-bar">
+            <a href="/Fixture">Fikstür</a>
+            <a href="/Standing">Puan Durumu</a>
+            <a href="/Players">Futbolcular</a>
+            <a href="/Players/TopScorers">Gol Krallığı</a>
+            <a href="/Stadiums">Stadyumlar</a>
+            <a href="/Match">Maç Sonuçları</a>
+        </div>
+
+        <a class="back-link" href="/Players">← Futbolculara dön</a>
+
+        <section class="profile-hero">
+            <div class="avatar-xl">
+                @if (!string.IsNullOrWhiteSpace(Model.PhotoUrl))
+                {
+                    <img src="@Model.PhotoUrl" alt="@Model.FullName" referrerpolicy="no-referrer" />
+                }
+                else
+                {
+                    <div class="fallback" style="@TeamVisual.Style(Model.TeamName)">@TeamVisual.Code(Model.FullName)</div>
+                }
+            </div>
+            <div class="profile-id">
+                <a class="profile-team" href="/Players">
+                    <span class="team-crest" style="@TeamVisual.Style(Model.TeamName)" aria-hidden="true">@TeamVisual.Code(Model.TeamName)</span>
+                    @Model.TeamName
+                </a>
+                <h1 class="profile-name">@Model.FullName</h1>
+                <p class="profile-sub">
+                    <span class="shirt-badge">@Model.ShirtNumber</span>
+                    &nbsp;@Model.Position
+                </p>
+            </div>
+        </section>
+
+        <div class="row g-3 info-grid">
+            <div class="col-6 col-md-3">
+                <dl class="info-card"><dt>Yaş</dt><dd>@(Model.Age?.ToString() ?? "—")</dd></dl>
+            </div>
+            <div class="col-6 col-md-3">
+                <dl class="info-card"><dt>Doğum tarihi</dt><dd style="font-size:1.25rem">@Birth</dd></dl>
+            </div>
+            <div class="col-6 col-md-3">
+                <dl class="info-card"><dt>Uyruk</dt><dd style="font-size:1.25rem">@Nat</dd></dl>
+            </div>
+            <div class="col-6 col-md-3">
+                <dl class="info-card"><dt>Mevki</dt><dd style="font-size:1.25rem">@Model.Position</dd></dl>
+            </div>
+        </div>
+
+        <h2 class="section-title">Oynadığı kulüpler</h2>
+        <div class="career-panel">
+            @if (Model.Careers != null && Model.Careers.Any())
+            {
+                <ul class="career-list">
+                    @foreach (var c in Model.Careers.OrderByDescending(x => x.StartYear))
+                    {
+                        <li>
+                            <span class="career-years">@c.StartYear – @(c.EndYear?.ToString() ?? "")</span>
+                            <span class="career-club">
+                                @c.ClubName
+                                @if (c.EndYear == null)
+                                {
+                                    <span class="badge-now">Halen</span>
+                                }
+                            </span>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="empty">Kariyer bilgisi bulunmuyor.</p>
+            }
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Takım Yönetimi | Serie A Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+  <style>
+    /* =============================================================
+       Serie A Admin - admin.css (Takımlar)
+       1 Tokens   2 Base + layout   3 Sidebar   4 Topbar
+       5 İtalya dokunuşları   6 Sayfa başlığı + butonlar   7 Lig şeridi
+       8 Filtre   9 Tablo   10 Rozetler + işlemler   11 Modal + form
+       12 Toast   13 Responsive
+       ============================================================= */
+
+    /* 1. Tokens */
+    :root {
+      --navy-900: #081530;
+      --navy-800: #0B1B3A;
+      --navy-700: #13284F;
+      --navy-600: #1C3563;
+
+      --blue: #1E5BD8;
+      --blue-hover: #174BB6;
+      --blue-soft: #E8EFFD;
+      --blue-line: #BFD2F7;
+
+      /* İtalyan üç rengi */
+      --it-green: #009246;
+      --it-white: #F4F5F0;
+      --it-red: #CE2B37;
+      --it-green-soft: #E2F4EA;
+      --it-red-soft: #FBE8EA;
+      --tricolore: linear-gradient(90deg, var(--it-green) 0 33.33%, var(--it-white) 33.33% 66.66%, var(--it-red) 66.66% 100%);
+      --tricolore-light: linear-gradient(90deg, var(--it-green) 0 33.33%, #D9DCD3 33.33% 66.66%, var(--it-red) 66.66% 100%);  /* açık zeminde */
+
+      --bg: #F2F5F9;
+      --white: #FFFFFF;
+      --line: #E1E7F0;
+      --line-strong: #CCD5E3;
+      --row-hover: #F7F9FC;
+
+      --text: #0F1B33;
+      --text-2: #33425E;
+      --muted: #5B6B86;
+      --dim: #8A97AD;
+
+      --amber: #B7791F;
+      --amber-soft: #FDF3DC;
+
+      --radius: 10px;
+      --radius-sm: 7px;
+      --sidebar-w: clamp(220px, 18vw, 264px);
+      --topbar-h: 60px;
+
+      --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+      --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    }
+
+    /* 2. Base + layout */
+    body.admin {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.45;
+      font-variant-numeric: tabular-nums;
+    }
+    .icon { width: 18px; height: 18px; flex: none; }
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      overflow: hidden; clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    .admin-main { margin-left: var(--sidebar-w); min-height: 100vh; }
+    .admin-content { padding: 26px 28px 48px; }
+
+    /* 3. Sidebar */
+    .admin-sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      width: var(--sidebar-w);
+      background: var(--navy-800);
+      color: #C9D4EA;
+    }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: var(--topbar-h);
+      padding: 0 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, .07);
+      color: #fff;
+      text-decoration: none;
+    }
+    .brand-mark {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      background: var(--blue);
+      font-family: var(--font-display);
+      font-size: .95rem;
+      font-weight: 700;
+    }
+    .brand-text { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; letter-spacing: .01em; }
+    .sidebar-label { margin: 20px 20px 8px; color: #7F8EAE; font-size: .75rem; font-weight: 600; }
+    .sidebar-nav { margin: 0; padding: 0 10px; list-style: none; }
+    .sidebar-link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: #C9D4EA;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background-color .12s ease, color .12s ease;
+    }
+    .sidebar-link .icon { color: #8D9CBC; }
+    .sidebar-link:hover { background: var(--navy-700); color: #fff; }
+    .sidebar-link:hover .icon { color: #fff; }
+    .sidebar-link.is-active { background: rgba(30, 91, 216, .28); color: #fff; font-weight: 600; }
+    .sidebar-link.is-active .icon { color: #8FB4FF; }
+    .sidebar-link.is-active::before {
+      content: "";
+      position: absolute;
+      top: 8px; bottom: 8px; left: -10px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: #4F86F7;
+    }
+    .sidebar-link:focus-visible { outline: 2px solid #8FB4FF; outline-offset: -2px; }
+    .sidebar-foot { margin-top: auto; padding: 10px 10px 14px; border-top: 1px solid rgba(255, 255, 255, .07); }
+    .sidebar-season { display: block; padding: 4px 12px 10px; color: #7F8EAE; font-size: .8rem; }
+    .sidebar-link--logout:hover { background: rgba(206, 43, 55, .2); color: #FFD5DB; }
+    .sidebar-link--logout:hover .icon { color: #FF9AA8; }
+    .sidebar-backdrop { display: none; }
+
+    /* 4. Topbar */
+    .admin-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      height: var(--topbar-h);
+      padding: 0 28px;
+      background: var(--white);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .topbar-title { margin: 0; font-size: 1rem; font-weight: 600; }
+    .topbar-crumb { color: var(--dim); font-size: .85rem; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 36px; height: 36px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--bg); color: var(--text); }
+    .icon-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+    .notif-dot {
+      position: absolute;
+      top: 8px; right: 9px;
+      width: 7px; height: 7px;
+      border: 2px solid var(--white);
+      border-radius: 50%;
+      background: var(--it-red);
+      box-sizing: content-box;
+    }
+    .menu-toggle { display: none; }
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 6px;
+      padding: 4px 10px 4px 14px;
+      border-left: 1px solid var(--line);
+    }
+    .avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--blue-soft); color: var(--blue); }
+    .topbar-user__name { font-weight: 600; font-size: .9rem; line-height: 1.1; }
+    .topbar-user__role { display: block; color: var(--dim); font-size: .75rem; }
+
+    /* 5. İtalya dokunuşları (Maçlar sayfasıyla ortak blok) */
+    .admin-sidebar::before {                 /* sidebar üstünde üç renk şerit */
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--tricolore);
+    }
+    .admin-sidebar {                         /* altta silik saha çizgileri */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 300' fill='none' stroke='white' stroke-opacity='.05' stroke-width='2'%3E%3Crect x='20' y='20' width='220' height='320' rx='2'/%3E%3Cpath d='M20 170h220'/%3E%3Ccircle cx='130' cy='170' r='46'/%3E%3Ccircle cx='130' cy='170' r='3' fill='white' fill-opacity='.05'/%3E%3Crect x='75' y='20' width='110' height='52'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center bottom -40px;
+      background-size: 100% auto;
+    }
+    .brand-mark::after {                     /* logonun altında üç renk bant */
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 4px;
+      background: var(--tricolore);
+    }
+    .admin-topbar::after {                   /* topbar altında ince üç renk çizgi */
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 2px;
+      background: var(--tricolore-light);
+    }
+    .page-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 600;
+    }
+    .page-eyebrow::before {
+      content: "";
+      width: 30px; height: 4px;
+      border-radius: 2px;
+      background: var(--tricolore-light);
+    }
+
+    /* 6. Sayfa başlığı + butonlar */
+    .page-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .page-title { margin: 0; font-family: var(--font-display); font-size: 2rem; font-weight: 700; line-height: 1.1; }
+    .page-desc { margin: 4px 0 0; color: var(--muted); }
+    .btn-a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 16px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      font: inherit;
+      font-size: .9rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background-color .12s ease, border-color .12s ease;
+    }
+    .btn-a .icon { width: 16px; height: 16px; }
+    .btn-a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .btn-a--primary { background: var(--blue); color: #fff; }
+    .btn-a--primary:hover { background: var(--blue-hover); }
+    .btn-a--secondary { border-color: var(--line-strong); background: var(--white); color: var(--text-2); }
+    .btn-a--secondary:hover { background: var(--bg); }
+    .btn-a--ghost { background: transparent; color: var(--muted); padding: 0 10px; }
+    .btn-a--ghost:hover { color: var(--text); background: var(--bg); }
+    .btn-a--danger { background: var(--it-red); color: #fff; }
+    .btn-a--danger:hover { background: #B02430; }
+
+    /* 7. Lig şeridi (kompakt özet) */
+    .league-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--white);
+    }
+    .strip-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+    }
+    .strip-item + .strip-item { border-left: 1px solid var(--line); }
+    .strip-icon {
+      display: grid;
+      place-items: center;
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: var(--tint);
+      color: var(--ink);
+    }
+    .strip-icon .icon { width: 17px; height: 17px; }
+    .strip-item--green { --tint: var(--it-green-soft); --ink: var(--it-green); }
+    .strip-item--blue  { --tint: var(--blue-soft);     --ink: var(--blue); }
+    .strip-item--red   { --tint: var(--it-red-soft);   --ink: var(--it-red); }
+    .strip-item--navy  { --tint: #E6EAF2;              --ink: var(--navy-700); }
+    .strip-label { display: block; color: var(--muted); font-size: .78rem; font-weight: 500; }
+    .strip-value { display: block; font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; line-height: 1.1; }
+    .strip-value small { color: var(--muted); font-family: var(--font-body); font-size: .78rem; font-weight: 500; }
+
+    /* 8. Filtre */
+    .card-a { border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); }
+    .filter-bar {
+      display: grid;
+      grid-template-columns: minmax(200px, 1.6fr) minmax(150px, 1fr) minmax(150px, 1fr) auto;
+      align-items: end;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .field-label { display: block; margin-bottom: 5px; color: var(--text-2); font-size: .8rem; font-weight: 600; }
+    .input-a, .select-a {
+      width: 100%;
+      height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      background: var(--white);
+      color: var(--text);
+      font: inherit;
+      font-size: .9rem;
+    }
+    .select-a {
+      appearance: none;
+      padding-right: 34px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235B6B86' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+    }
+    .input-a::placeholder { color: var(--dim); }
+    .input-a:focus, .select-a:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30, 91, 216, .15); }
+    .input-icon { position: relative; }
+    .input-icon .icon { position: absolute; top: 50%; left: 11px; width: 16px; height: 16px; transform: translateY(-50%); color: var(--dim); pointer-events: none; }
+    .input-icon .input-a { padding-left: 34px; }
+    .filter-actions { display: flex; gap: 6px; }
+
+    /* 9. Tablo */
+    .table-scroll { overflow-x: auto; }
+    .team-table { width: 100%; min-width: 920px; border-collapse: collapse; }
+    .team-table th {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #F8FAFC;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 600;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .team-table td {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--text-2);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .team-table tbody tr:last-child td { border-bottom: 0; }
+    .team-table tbody tr:hover td { background: var(--row-hover); }
+    .team-table tbody tr.is-inactive td { color: var(--dim); }
+    .team-table tbody tr.is-inactive .team-name { color: var(--muted); }
+    .team-table tbody tr.is-new td { animation: row-flash 2.4s ease-out; }
+    @keyframes row-flash { 0%, 40% { background: var(--blue-soft); } 100% { background: transparent; } }
+    .col-id { width: 56px; color: var(--muted); font-weight: 600; }
+    .col-num { text-align: right !important; }
+    .col-actions { width: 1%; text-align: right !important; }
+
+    .sort-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+    .sort-btn:hover { color: var(--text); }
+    .sort-btn::after { content: "↕"; color: var(--line-strong); font-size: .85em; }
+    [aria-sort="ascending"] .sort-btn::after { content: "↑"; color: var(--blue); }
+    [aria-sort="descending"] .sort-btn::after { content: "↓"; color: var(--blue); }
+    .sort-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 3px; }
+
+    .team-cell { display: flex; align-items: center; gap: 12px; }
+    .team-crest {
+      --size: 34px;
+      flex: none;
+      display: inline-grid;
+      place-items: center;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: linear-gradient(180deg, var(--crest-a) 0 70%, var(--crest-b) 70% 100%);
+      color: var(--crest-ink, #fff);
+      font-family: var(--font-display);
+      font-size: calc(var(--size) * .33);
+      font-weight: 700;
+      line-height: 1;
+      padding-bottom: calc(var(--size) * .12);
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14);
+    }
+    .team-crest--lg { --size: 64px; }
+    img.team-crest { object-fit: contain; background: none; padding: 0; box-shadow: none; }
+    .team-name { display: block; color: var(--text); font-weight: 600; line-height: 1.2; }
+    .team-code { color: var(--dim); font-size: .78rem; font-weight: 600; letter-spacing: .04em; }
+    .city-cell small { display: block; color: var(--dim); font-size: .78rem; }
+    .swatches { display: inline-flex; }
+    .swatch {
+      width: 18px; height: 18px;
+      border: 2px solid var(--white);
+      border-radius: 50%;
+      background: var(--c);
+      box-shadow: 0 0 0 1px var(--line-strong);
+    }
+    .swatch + .swatch { margin-left: -6px; }
+
+    .table-foot {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .table-empty td { padding: 40px 16px !important; text-align: center; color: var(--muted); white-space: normal !important; }
+    .table-empty strong { display: block; margin-bottom: 2px; color: var(--text); }
+
+    /* 10. Rozetler + işlem butonları */
+    .badge-a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 600;
+    }
+    .badge-a--active   { background: var(--it-green-soft); color: var(--it-green); }
+    .badge-a--active::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--it-green); }
+    .badge-a--inactive { background: #EDF0F5; color: var(--muted); }
+
+    .region {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+    .region::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--rc); }
+    .region--north  { --rc: var(--it-green); }
+    .region--center { --rc: #9AA5B8; }
+    .region--south  { --rc: var(--it-red); }
+    .region--island { --rc: var(--blue); }
+
+    .row-actions { display: inline-flex; gap: 4px; }
+    .act-btn {
+      display: grid;
+      place-items: center;
+      width: 30px; height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--white);
+      color: var(--muted);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color .12s ease, color .12s ease, border-color .12s ease;
+    }
+    .act-btn .icon { width: 15px; height: 15px; }
+    .act-btn:hover { border-color: var(--blue-line); background: var(--blue-soft); color: var(--blue); }
+    .act-btn--danger:hover { border-color: #F3C0C8; background: var(--it-red-soft); color: var(--it-red); }
+    .act-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+    /* 11. Modal + form */
+    .modal-a {
+      width: min(680px, calc(100vw - 32px));
+      max-height: calc(100vh - 48px);
+      padding: 0;
+      border: 0;
+      border-radius: 12px;
+      background: var(--white);
+      color: var(--text);
+      box-shadow: 0 24px 60px rgba(8, 21, 48, .28);
+      overflow: hidden;
+    }
+    .modal-a--sm { width: min(420px, calc(100vw - 32px)); }
+    .modal-a::backdrop { background: rgba(8, 21, 48, .5); }
+    .modal-a[open] { animation: modal-in .16s ease-out; }
+    @keyframes modal-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .modal-a form { display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
+    .modal-a::before { content: ""; display: block; height: 4px; background: var(--tricolore); }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .modal-title { margin: 0; font-size: 1.15rem; font-weight: 700; }
+    .modal-body { padding: 18px 20px 16px; overflow-y: auto; }
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--line);
+      background: #F8FAFC;
+    }
+    .crest-preview {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      background: #FAFBFD;
+    }
+    .crest-preview__name { display: block; font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
+    .crest-preview__meta { color: var(--muted); font-size: .85rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+    .form-grid .span-2 { grid-column: 1 / -1; }
+    .form-field { min-width: 0; }
+    .req { color: var(--it-red); }
+    .field-hint { margin: 4px 0 0; color: var(--dim); font-size: .78rem; }
+    .field-error { display: none; margin: 5px 0 0; color: var(--it-red); font-size: .8rem; font-weight: 500; }
+    .form-field.has-error .input-a,
+    .form-field.has-error .select-a { border-color: var(--it-red); box-shadow: 0 0 0 3px rgba(206, 43, 55, .12); }
+    .form-field.has-error .field-error { display: block; }
+    .form-field.has-error .field-hint { display: none; }
+    .color-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .color-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 38px;
+      padding: 0 6px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+    }
+    .color-input input[type="color"] { width: 30px; height: 26px; padding: 0; border: 0; background: none; cursor: pointer; }
+    .color-input code { color: var(--text-2); font-size: .85rem; }
+    .form-field.has-error .color-input { border-color: var(--it-red); }
+    .code-input { text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+    .form-alert {
+      display: none;
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      border: 1px solid #F3C0C8;
+      border-radius: var(--radius-sm);
+      background: var(--it-red-soft);
+      color: #9E2436;
+      font-size: .85rem;
+      font-weight: 500;
+    }
+    .form-alert.is-visible { display: block; }
+    .confirm-text { margin: 0; color: var(--text-2); }
+
+    /* 12. Toast */
+    .toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 60; display: flex; flex-direction: column; gap: 8px; }
+    .toast-a {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 260px;
+      padding: 11px 14px 13px;
+      border-radius: 9px;
+      background: var(--navy-800);
+      color: #fff;
+      font-size: .9rem;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(8, 21, 48, .25);
+      animation: modal-in .16s ease-out;
+    }
+    .toast-a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--tricolore); }
+    .toast-a .icon { width: 18px; height: 18px; }
+    .toast-a--success .icon { color: #4FD8A4; }
+    .toast-a--info .icon { color: #8FB4FF; }
+
+    /* 13. Responsive */
+    @media (max-width: 1100px) {
+      .filter-bar { grid-template-columns: 1fr 1fr; }
+      .filter-bar .filter-search { grid-column: 1 / -1; }
+      .filter-actions { grid-column: 1 / -1; justify-content: flex-end; }
+      .league-strip { grid-template-columns: 1fr 1fr; }
+      .strip-item:nth-child(3) { border-left: 0; }
+      .strip-item:nth-child(n+3) { border-top: 1px solid var(--line); }
+    }
+    @media (max-width: 991.98px) {
+      .admin-main { margin-left: 0; }
+      .admin-sidebar { width: 260px; transform: translateX(-100%); transition: transform .2s ease; }
+      body.sidebar-open .admin-sidebar { transform: none; }
+      body.sidebar-open .sidebar-backdrop { display: block; position: fixed; inset: 0; z-index: 35; background: rgba(8, 21, 48, .45); }
+      .menu-toggle { display: grid; }
+      .admin-topbar { padding: 0 16px; }
+      .admin-content { padding: 20px 16px 40px; }
+      .topbar-crumb { display: none; }
+    }
+    @media (max-width: 575.98px) {
+      .filter-bar, .form-grid, .color-row { grid-template-columns: 1fr; }
+      .page-head .btn-a--primary { width: 100%; }
+      .topbar-user__text { display: none; }
+      .toast-stack { left: 16px; right: 16px; }
+      .strip-item { padding: 10px 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body class="admin">
+  <!-- İkon seti -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-ball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.6l3.3 2.4-1.3 3.8h-4l-1.3-3.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16M9 4v16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 19.5c.7-3 3.1-4.8 6-4.8s5.3 1.8 6 4.8M16 5.2a3.4 3.4 0 0 1 0 6.6M17.5 14.9c1.8.6 3 2.2 3.5 4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M14 4h4.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14M10 16l-4-4 4-4M6 12h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2.2 2.2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 20c.9-3.6 3.9-5.6 7.5-5.6s6.6 2 7.5 5.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 12.5l2.7 2.7L16 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5M12 8h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-stadium" viewBox="0 0 24 24"><ellipse cx="12" cy="9" rx="9" ry="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 9v6c0 1.9 4 3.5 9 3.5s9-1.6 9-3.5V9" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  </svg>
+
+  <!-- ===== Partial: _AdminSidebar ===== -->
+  <aside class="admin-sidebar" id="admin-sidebar" aria-label="Yönetim menüsü">
+    <a class="sidebar-brand" href="/Admin" data-demo-nav>
+      <span class="brand-mark" aria-hidden="true">SA</span>
+      <span class="brand-text">Serie A Admin</span>
+    </a>
+    <p class="sidebar-label">Yönetim</p>
+    <ul class="sidebar-nav">
+      <li><a class="sidebar-link" href="/Admin" data-demo-nav><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>Ana Sayfa</a></li>
+      <li><a class="sidebar-link" href="/Admin/Matches" data-demo-nav><svg class="icon" aria-hidden="true"><use href="#i-ball"/></svg>Maçlar</a></li>
+      <li><a class="sidebar-link is-active" href="/Admin/Teams" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>Takımlar</a></li>
+      <li><a class="sidebar-link" href="/Admin/Weeks" data-demo-nav><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Haftalar</a></li>
+      <li><a class="sidebar-link" href="/Admin/Standings" data-demo-nav><svg class="icon" aria-hidden="true"><use href="#i-table"/></svg>Puan Durumu</a></li>
+      <li><a class="sidebar-link" href="/Admin/Users" data-demo-nav><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Kullanıcılar</a></li>
+    </ul>
+    <div class="sidebar-foot">
+      <span class="sidebar-season">Sezon 2026/27</span>
+      <a class="sidebar-link sidebar-link--logout" href="/Account/Logout" data-demo-nav><svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg>Çıkış Yap</a>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" data-sidebar-close></div>
+
+  <div class="admin-main">
+    <!-- ===== Partial: _AdminTopbar ===== -->
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <button type="button" class="icon-btn menu-toggle" data-sidebar-toggle aria-controls="admin-sidebar" aria-expanded="false" aria-label="Menüyü aç">
+          <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+        </button>
+        <p class="topbar-title">Takım Yönetimi</p>
+        <span class="topbar-crumb">Yönetim / Takımlar</span>
+      </div>
+      <div class="topbar-right">
+        <button type="button" class="icon-btn" aria-label="Bildirimler, 3 okunmamış" data-demo-action>
+          <svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span class="notif-dot"></span>
+        </button>
+        <div class="topbar-user">
+          <span class="avatar"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></span>
+          <span class="topbar-user__text"><span class="topbar-user__name">Yönetici</span><span class="topbar-user__role">Tam yetkili</span></span>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <div class="page-head">
+        <div>
+          <span class="page-eyebrow">Serie A 2026/27</span>
+          <h1 class="page-title">Takım Yönetimi</h1>
+          <p class="page-desc">Serie A kulüplerini görüntüleyebilir, ekleyebilir, düzenleyebilir ve silebilirsiniz.</p>
+        </div>
+        <button type="button" class="btn-a btn-a--primary" data-open-create>
+          <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Yeni Takım Ekle
+        </button>
+      </div>
+
+      <!-- Partial: _LeagueStrip (kompakt lig özeti) -->
+      <section class="league-strip" aria-label="Lig özeti" data-league-strip></section>
+
+      <!-- ===== Partial: _TeamTable (filtre + tablo) ===== -->
+      <section class="card-a" aria-label="Takım listesi">
+        <form class="filter-bar" data-filter-form role="search">
+          <div class="filter-search">
+            <label class="field-label" for="f-q">Takım Ara</label>
+            <div class="input-icon">
+              <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+              <input class="input-a" id="f-q" name="q" type="search" placeholder="Takım, şehir veya stadyum" autocomplete="off">
+            </div>
+          </div>
+          <div>
+            <label class="field-label" for="f-region">Bölge</label>
+            <select class="select-a" id="f-region" name="region">
+              <option value="">Tüm Bölgeler</option>
+              <option value="north">Kuzey İtalya</option>
+              <option value="center">Orta İtalya</option>
+              <option value="south">Güney İtalya</option>
+              <option value="island">Adalar</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="f-status">Durum</label>
+            <select class="select-a" id="f-status" name="status">
+              <option value="">Tümü</option>
+              <option value="active">Aktif (Serie A)</option>
+              <option value="inactive">Pasif</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button type="button" class="btn-a btn-a--ghost" data-filter-reset>Temizle</button>
+            <button type="submit" class="btn-a btn-a--secondary">Filtrele</button>
+          </div>
+        </form>
+
+        <div class="table-scroll">
+          <table class="team-table">
+            <caption class="visually-hidden">Serie A takım listesi</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="col-id" data-sort-col="id" aria-sort="ascending"><button type="button" class="sort-btn" data-sort="id">ID</button></th>
+                <th scope="col" data-sort-col="name"><button type="button" class="sort-btn" data-sort="name">Takım</button></th>
+                <th scope="col">Şehir / Bölge</th>
+                <th scope="col">Stadyum</th>
+                <th scope="col" class="col-num" data-sort-col="capacity"><button type="button" class="sort-btn" data-sort="capacity">Kapasite</button></th>
+                <th scope="col" class="col-num" data-sort-col="founded"><button type="button" class="sort-btn" data-sort="founded">Kuruluş</button></th>
+                <th scope="col">Renkler</th>
+                <th scope="col">Durum</th>
+                <th scope="col" class="col-actions">İşlemler</th>
+              </tr>
+            </thead>
+            <!-- Razor: @foreach (var t in Model.Teams) { <partial name="_TeamRow" model="t" /> } -->
+            <tbody data-team-rows></tbody>
+          </table>
+        </div>
+        <div class="table-foot">
+          <span data-result-count></span>
+          <span>Serie A'da en fazla 20 aktif takım bulunabilir</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== Partial: _CreateTeamModal (ekleme + düzenleme) ===== -->
+  <dialog class="modal-a" id="team-modal" aria-labelledby="team-modal-title">
+    <form data-team-form novalidate>
+      <div class="modal-head">
+        <h2 class="modal-title" id="team-modal-title">Yeni Takım Ekle</h2>
+        <button type="button" class="icon-btn" data-modal-close aria-label="Kapat"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-alert" data-form-alert role="alert">Lütfen işaretli alanları kontrol edin.</div>
+
+        <div class="crest-preview" aria-live="polite">
+          <span class="team-crest team-crest--lg" data-preview-crest aria-hidden="true">---</span>
+          <div>
+            <span class="crest-preview__name" data-preview-name>Takım adı</span>
+            <span class="crest-preview__meta" data-preview-meta>Şehir, stadyum</span>
+          </div>
+        </div>
+
+        <input type="hidden" name="id">
+        <div class="form-grid">
+          <div class="form-field" data-field="name">
+            <label class="field-label" for="t-name">Takım Adı <span class="req">*</span></label>
+            <input class="input-a" id="t-name" name="name" type="text" maxlength="40" placeholder="Örn. Sampdoria" autocomplete="off">
+            <p class="field-error"></p>
+          </div>
+          <div class="form-field" data-field="code">
+            <label class="field-label" for="t-code">Kısa Ad <span class="req">*</span></label>
+            <input class="input-a code-input" id="t-code" name="code" type="text" maxlength="3" placeholder="SAM" autocomplete="off">
+            <p class="field-hint">Tabloda ve armada görünen 3 harfli kod</p>
+            <p class="field-error"></p>
+          </div>
+          <div class="form-field" data-field="city">
+            <label class="field-label" for="t-city">Şehir <span class="req">*</span></label>
+            <input class="input-a" id="t-city" name="city" type="text" placeholder="Örn. Genova" autocomplete="off">
+            <p class="field-error"></p>
+          </div>
+          <div class="form-field" data-field="region">
+            <label class="field-label" for="t-region">Bölge <span class="req">*</span></label>
+            <select class="select-a" id="t-region" name="region">
+              <option value="">Bölge seçin</option>
+              <option value="north">Kuzey İtalya</option>
+              <option value="center">Orta İtalya</option>
+              <option value="south">Güney İtalya</option>
+              <option value="island">Adalar</option>
+            </select>
+            <p class="field-error"></p>
+          </div>
+          <div class="form-field span-2" data-field="stadium">
+            <label class="field-label" for="t-stadium">Stadyum <span class="req">*</span></label>
+            <input class="input-a" id="t-stadium" name="stadium" type="text" placeholder="Örn. Stadio Luigi Ferraris" autocomplete="off">
+            <p class="field-error"></p>
+          </div>
+          <div class="form-field" data-field="capacity">
+            <label class="field-label" for="t-capacity">Stadyum Kapasitesi <span class="req">*</span></label>
+            <input class="input-a" id="t-capacity" name="capacity" type="number" min="1000" max="100000" step="1" inputmode="numeric" placeholder="Örn. 36599">
+            <p class="field-error"></p>
+          </div>
+          <div class="form-field" data-field="founded">
+            <label class="field-label" for="t-founded">Kuruluş Yılı <span class="req">*</span></label>
+            <input class="input-a" id="t-founded" name="founded" type="number" min="1850" max="2026" step="1" inputmode="numeric" placeholder="Örn. 1946">
+            <p class="field-error"></p>
+          </div>
+          <div class="form-field span-2" data-field="colors">
+            <span class="field-label">Kulüp Renkleri <span class="req">*</span></span>
+            <div class="color-row">
+              <label class="color-input">
+                <input type="color" name="colorA" value="#1E5BD8" aria-label="Ana renk">
+                <span>Ana renk <code data-color-a>#1E5BD8</code></span>
+              </label>
+              <label class="color-input">
+                <input type="color" name="colorB" value="#FFFFFF" aria-label="İkinci renk">
+                <span>İkinci renk <code data-color-b>#FFFFFF</code></span>
+              </label>
+            </div>
+            <p class="field-error"></p>
+          </div>
+          <div class="form-field span-2" data-field="status">
+            <label class="field-label" for="t-status">Durum</label>
+            <select class="select-a" id="t-status" name="status">
+              <option value="active">Aktif (Serie A'da oynuyor)</option>
+              <option value="inactive">Pasif</option>
+            </select>
+            <p class="field-hint" data-status-hint></p>
+            <p class="field-error"></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn-a btn-a--secondary" data-modal-close>Vazgeç</button>
+        <button type="submit" class="btn-a btn-a--primary">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Silme onayı -->
+  <dialog class="modal-a modal-a--sm" id="delete-modal" aria-labelledby="delete-modal-title">
+    <form method="dialog">
+      <div class="modal-head">
+        <h2 class="modal-title" id="delete-modal-title">Takımı sil</h2>
+        <button type="submit" value="cancel" class="icon-btn" aria-label="Kapat"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="modal-body"><p class="confirm-text" data-delete-text></p></div>
+      <div class="modal-foot">
+        <button type="submit" value="cancel" class="btn-a btn-a--secondary">Vazgeç</button>
+        <button type="submit" value="confirm" class="btn-a btn-a--danger">Evet, sil</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast-stack" data-toasts aria-live="polite"></div>
+
+  <script>
+    /* =============================================================
+       Serie A Admin - teams.js
+       Demo veri + filtre + sıralama + ekle/düzenle/sil.
+       API'ye geçişte yorumlardaki uç noktalar kullanılır.
+       ============================================================= */
+    (function () {
+      'use strict';
+
+      const MAX_ACTIVE = 20;
+      const REGION = { north: 'Kuzey İtalya', center: 'Orta İtalya', south: 'Güney İtalya', island: 'Adalar' };
+
+      /* Demo kayıtlar (API: GET /api/admin/teams). Kapasite ve yıllar demo amaçlıdır. */
+      let teams = [
+        [1,  'Atalanta',    'ATA', 'Bergamo',   'north',  'Gewiss Stadium',                24950, 1907, '#1E6FB8', '#111111', 'active'],
+        [2,  'Bologna',     'BOL', 'Bologna',   'north',  "Stadio Renato Dall'Ara",        36462, 1909, '#1A2F5A', '#A21C26', 'active'],
+        [3,  'Cagliari',    'CAG', 'Cagliari',  'island', 'Unipol Domus',                  16416, 1920, '#A5162B', '#0E2A56', 'active'],
+        [4,  'Como',        'COM', 'Como',      'north',  'Stadio Giuseppe Sinigaglia',    13602, 1907, '#0B3E91', '#FFFFFF', 'active'],
+        [5,  'Fiorentina',  'FIO', 'Firenze',   'center', 'Stadio Artemio Franchi',        43147, 1926, '#5B2A86', '#FFFFFF', 'active'],
+        [6,  'Frosinone',   'FRO', 'Frosinone', 'center', 'Stadio Benito Stirpe',          16227, 1928, '#1C4E9A', '#FFD200', 'active'],
+        [7,  'Genoa',       'GEN', 'Genova',    'north',  'Stadio Luigi Ferraris',         36599, 1893, '#A2172E', '#002B5C', 'active'],
+        [8,  'Inter',       'INT', 'Milano',    'north',  'San Siro',                      75817, 1908, '#0A4FA8', '#101418', 'active'],
+        [9,  'Juventus',    'JUV', 'Torino',    'north',  'Allianz Stadium',               41507, 1897, '#16181D', '#E8E8E8', 'active'],
+        [10, 'Lazio',       'LAZ', 'Roma',      'center', 'Stadio Olimpico',               70634, 1900, '#8FD3F4', '#FFFFFF', 'active'],
+        [11, 'Lecce',       'LEC', 'Lecce',     'south',  'Stadio Via del Mare',           31533, 1908, '#F6D000', '#D21F26', 'active'],
+        [12, 'Milan',       'MIL', 'Milano',    'north',  'San Siro',                      75817, 1899, '#C8141E', '#111111', 'active'],
+        [13, 'Monza',       'MON', 'Monza',     'north',  'U-Power Stadium',               16917, 1912, '#D2122E', '#FFFFFF', 'active'],
+        [14, 'Napoli',      'NAP', 'Napoli',    'south',  'Stadio Diego Armando Maradona', 54726, 1926, '#1E9BD7', '#0C3C78', 'active'],
+        [15, 'Parma',       'PAR', 'Parma',     'north',  'Stadio Ennio Tardini',          22352, 1913, '#FFD200', '#1D3E8A', 'active'],
+        [16, 'Roma',        'ROM', 'Roma',      'center', 'Stadio Olimpico',               70634, 1927, '#8E1F2F', '#F0B323', 'active'],
+        [17, 'Sassuolo',    'SAS', 'Sassuolo',  'north',  'Mapei Stadium',                 21584, 1920, '#00A651', '#111111', 'active'],
+        [18, 'Torino',      'TOR', 'Torino',    'north',  'Stadio Olimpico Grande Torino', 27958, 1906, '#7E1B1B', '#E9D9B0', 'active'],
+        [19, 'Udinese',     'UDI', 'Udine',     'north',  'Bluenergy Stadium',             25144, 1896, '#26282C', '#FFFFFF', 'active'],
+        [20, 'Venezia',     'VEN', 'Venezia',   'north',  'Stadio Pier Luigi Penzo',       11150, 1907, '#141414', '#F06A1A', 'active'],
+        [21, 'Sampdoria',   'SAM', 'Genova',    'north',  'Stadio Luigi Ferraris',         36599, 1946, '#1B4FA0', '#FFFFFF', 'inactive'],
+        [22, 'Salernitana', 'SAL', 'Salerno',   'south',  'Stadio Arechi',                 37180, 1919, '#7A1E2E', '#FFFFFF', 'inactive']
+      ].map(([id, name, code, city, region, stadium, capacity, founded, colorA, colorB, status]) =>
+        ({ id, name, code, city, region, stadium, capacity, founded, colorA, colorB, status }));
+
+      /* ---------- Yardımcılar ---------- */
+      const $ = (sel, root = document) => root.querySelector(sel);
+      const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const norm = (s) => String(s).toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const num = (n) => new Intl.NumberFormat('tr-TR').format(n);
+      const icon = (id) => `<svg class="icon" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+      const activeCount = () => teams.filter((t) => t.status === 'active').length;
+
+      /* Arma yazısı: ana rengin açıklığına göre koyu/açık */
+      function inkFor(hex) {
+        const h = hex.replace('#', '');
+        const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+        return (0.299 * r + 0.587 * g + 0.114 * b) > 170 ? '#10224A' : '#FFFFFF';
+      }
+      const crestStyle = (a, b) => `--crest-a:${a};--crest-b:${b};--crest-ink:${inkFor(a)}`;
+
+      const els = {
+        rows: $('[data-team-rows]'),
+        count: $('[data-result-count]'),
+        strip: $('[data-league-strip]'),
+        filter: $('[data-filter-form]'),
+        modal: $('#team-modal'),
+        form: $('[data-team-form]'),
+        title: $('#team-modal-title'),
+        alert: $('[data-form-alert]'),
+        del: $('#delete-modal'),
+        delText: $('[data-delete-text]'),
+        toasts: $('[data-toasts]')
+      };
+      let filters = { q: '', region: '', status: '' };
+      let sort = { key: 'id', dir: 1 };
+
+      /* ---------- Lig şeridi ---------- */
+      function renderStrip() {
+        const active = teams.filter((t) => t.status === 'active');
+        const stadiums = new Map(active.map((t) => [t.stadium, t.capacity]));  // ortak stadyumlar bir kez sayılır
+        const capacity = Array.from(stadiums.values()).reduce((s, c) => s + c, 0);
+        const cities = new Set(active.map((t) => t.city)).size;
+        const oldest = active.slice().sort((a, b) => a.founded - b.founded)[0];
+        els.strip.innerHTML = `
+          <div class="strip-item strip-item--green"><span class="strip-icon">${icon('shield')}</span><div><span class="strip-label">Aktif takım</span><span class="strip-value">${active.length} <small>/ ${MAX_ACTIVE}</small></span></div></div>
+          <div class="strip-item strip-item--blue"><span class="strip-icon">${icon('pin')}</span><div><span class="strip-label">Temsil edilen şehir</span><span class="strip-value">${cities}</span></div></div>
+          <div class="strip-item strip-item--navy"><span class="strip-icon">${icon('stadium')}</span><div><span class="strip-label">Toplam stadyum kapasitesi</span><span class="strip-value">${num(capacity)}</span></div></div>
+          <div class="strip-item strip-item--red"><span class="strip-icon">${icon('clock')}</span><div><span class="strip-label">En köklü kulüp</span><span class="strip-value">${oldest ? `${esc(oldest.name)} <small>${oldest.founded}</small>` : '-'}</span></div></div>`;
+      }
+
+      /* ---------- Tablo ---------- */
+      function visibleTeams() {
+        const q = norm(filters.q.trim());
+        return teams
+          .filter((t) =>
+            (!q || [t.name, t.city, t.stadium, t.code].some((v) => norm(v).includes(q))) &&
+            (!filters.region || t.region === filters.region) &&
+            (!filters.status || t.status === filters.status))
+          .sort((a, b) => {
+            const x = a[sort.key], y = b[sort.key];
+            return (typeof x === 'string' ? x.localeCompare(y, 'tr') : x - y) * sort.dir;
+          });
+      }
+
+      function renderTable(highlightId) {
+        const list = visibleTeams();
+        if (!list.length) {
+          els.rows.innerHTML = `<tr class="table-empty"><td colspan="9"><strong>Takım bulunamadı</strong>Filtreleri değiştirin ya da Temizle ile tüm takımları gösterin.</td></tr>`;
+        } else {
+          els.rows.innerHTML = list.map((t) => `
+            <tr data-id="${t.id}" class="${t.status === 'inactive' ? 'is-inactive' : ''}${t.id === highlightId ? ' is-new' : ''}">
+              <td class="col-id">${t.id}</td>
+              <td>
+                <div class="team-cell">
+                  <span class="team-crest" style="${crestStyle(t.colorA, t.colorB)}" aria-hidden="true">${esc(t.code)}</span>
+                  <div><span class="team-name">${esc(t.name)}</span><span class="team-code">${esc(t.code)}</span></div>
+                </div>
+              </td>
+              <td class="city-cell">${esc(t.city)}<small><span class="region region--${t.region}">${REGION[t.region]}</span></small></td>
+              <td>${esc(t.stadium)}</td>
+              <td class="col-num">${num(t.capacity)}</td>
+              <td class="col-num">${t.founded}</td>
+              <td><span class="swatches" title="${t.colorA} / ${t.colorB}"><span class="swatch" style="--c:${t.colorA}"></span><span class="swatch" style="--c:${t.colorB}"></span></span></td>
+              <td><span class="badge-a badge-a--${t.status}">${t.status === 'active' ? 'Aktif' : 'Pasif'}</span></td>
+              <td class="col-actions">
+                <div class="row-actions">
+                  <a class="act-btn" href="/Admin/Teams/Detail/${t.id}" data-demo-nav title="Detay" aria-label="Detay: ${esc(t.name)}">${icon('eye')}</a>
+                  <button type="button" class="act-btn" data-edit="${t.id}" title="Düzenle" aria-label="Düzenle: ${esc(t.name)}">${icon('edit')}</button>
+                  <button type="button" class="act-btn act-btn--danger" data-delete="${t.id}" title="Sil" aria-label="Sil: ${esc(t.name)}">${icon('trash')}</button>
+                </div>
+              </td>
+            </tr>`).join('');
+        }
+        els.count.textContent = `${teams.length} takımdan ${list.length} tanesi gösteriliyor`;
+        document.querySelectorAll('[data-sort-col]').forEach((th) =>
+          th.setAttribute('aria-sort', th.dataset.sortCol === sort.key ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'));
+      }
+      function renderAll(highlightId) { renderStrip(); renderTable(highlightId); }
+
+      /* Filtre + sıralama */
+      els.filter.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(els.filter);
+        filters = { q: fd.get('q') || '', region: fd.get('region') || '', status: fd.get('status') || '' };
+        renderTable();
+      });
+      $('[data-filter-reset]').addEventListener('click', () => {
+        els.filter.reset();
+        filters = { q: '', region: '', status: '' };
+        renderTable();
+      });
+      document.querySelectorAll('[data-sort]').forEach((btn) => btn.addEventListener('click', () => {
+        const key = btn.dataset.sort;
+        sort = sort.key === key ? { key, dir: -sort.dir } : { key, dir: 1 };
+        renderTable();
+      }));
+
+      /* ---------- Form ---------- */
+      const f = els.form.elements;
+      const preview = {
+        crest: $('[data-preview-crest]'),
+        name: $('[data-preview-name]'),
+        meta: $('[data-preview-meta]'),
+        colorA: $('[data-color-a]'),
+        colorB: $('[data-color-b]'),
+        statusHint: $('[data-status-hint]')
+      };
+
+      function updatePreview() {
+        const a = f.colorA.value.toUpperCase(), b = f.colorB.value.toUpperCase();
+        preview.crest.setAttribute('style', crestStyle(a, b));
+        preview.crest.textContent = (f.code.value || '---').toUpperCase();
+        preview.name.textContent = f.name.value.trim() || 'Takım adı';
+        const meta = [f.city.value.trim(), f.stadium.value.trim()].filter(Boolean).join(', ');
+        preview.meta.textContent = meta || 'Şehir, stadyum';
+        preview.colorA.textContent = a;
+        preview.colorB.textContent = b;
+      }
+      function updateStatusHint() {
+        const editingActive = f.id.value && teams.find((t) => t.id === Number(f.id.value))?.status === 'active';
+        const used = activeCount() - (editingActive ? 1 : 0);
+        preview.statusHint.textContent = `Ligde şu anda ${activeCount()} aktif takım var (sınır ${MAX_ACTIVE}).` +
+          (used >= MAX_ACTIVE ? ' Yeni aktif takım için önce bir takımı pasif yapın.' : '');
+      }
+
+      f.code.addEventListener('input', () => { f.code.value = f.code.value.toLocaleUpperCase('tr-TR').replace(/[^A-ZÇĞİÖŞÜ]/g, ''); });
+      ['name', 'code', 'city', 'stadium', 'colorA', 'colorB'].forEach((n) => f[n].addEventListener('input', updatePreview));
+      ['name', 'code', 'city', 'region', 'stadium', 'capacity', 'founded', 'status'].forEach((n) =>
+        f[n].addEventListener('input', () => clearError(n)));
+      ['colorA', 'colorB'].forEach((n) => f[n].addEventListener('input', () => clearError('colors')));
+
+      function setError(name, msg) {
+        const field = els.form.querySelector(`[data-field="${name}"]`);
+        field.classList.add('has-error');
+        field.querySelector('.field-error').textContent = msg;
+        const input = f[name] || field.querySelector('input');
+        if (input && input.setAttribute) input.setAttribute('aria-invalid', 'true');
+      }
+      function clearError(name) {
+        const field = els.form.querySelector(`[data-field="${name}"]`);
+        if (!field) return;
+        field.classList.remove('has-error');
+        field.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+      }
+      function clearAllErrors() {
+        els.form.querySelectorAll('.has-error').forEach((el) => el.classList.remove('has-error'));
+        els.form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+        els.alert.classList.remove('is-visible');
+      }
+
+      function validate(d) {
+        const errors = [];
+        const selfId = Number(d.id) || null;
+        const others = teams.filter((t) => t.id !== selfId);
+        const name = d.name.trim();
+        const code = d.code.trim().toUpperCase();
+
+        if (!name) errors.push(['name', 'Lütfen takım adını girin.']);
+        else if (name.length < 2) errors.push(['name', 'Takım adı en az 2 karakter olmalı.']);
+        else if (others.some((t) => norm(t.name) === norm(name))) errors.push(['name', 'Bu isimde bir takım zaten kayıtlı.']);
+
+        if (!code) errors.push(['code', 'Lütfen 3 harfli kısa adı girin.']);
+        else if (code.length !== 3) errors.push(['code', 'Kısa ad tam olarak 3 harften oluşmalı.']);
+        else if (others.some((t) => t.code === code)) errors.push(['code', 'Bu kısa ad başka bir takım tarafından kullanılıyor.']);
+
+        if (!d.city.trim()) errors.push(['city', 'Lütfen şehir girin.']);
+        if (!d.region) errors.push(['region', 'Lütfen bölge seçin.']);
+        if (!d.stadium.trim()) errors.push(['stadium', 'Lütfen stadyum adını girin.']);
+
+        const cap = Number(d.capacity);
+        if (d.capacity === '') errors.push(['capacity', 'Lütfen stadyum kapasitesini girin.']);
+        else if (!Number.isInteger(cap) || cap < 1000 || cap > 100000) errors.push(['capacity', 'Kapasite 1.000 ile 100.000 arasında olmalı.']);
+
+        const year = Number(d.founded);
+        if (d.founded === '') errors.push(['founded', 'Lütfen kuruluş yılını girin.']);
+        else if (!Number.isInteger(year) || year < 1850 || year > 2026) errors.push(['founded', 'Kuruluş yılı 1850 ile 2026 arasında olmalı.']);
+
+        if (d.colorA.toUpperCase() === d.colorB.toUpperCase()) errors.push(['colors', 'Ana renk ve ikinci renk aynı olamaz.']);
+
+        if (d.status === 'active') {
+          const wasActive = selfId && teams.find((t) => t.id === selfId)?.status === 'active';
+          if (!wasActive && activeCount() >= MAX_ACTIVE)
+            errors.push(['status', `Serie A'da en fazla ${MAX_ACTIVE} aktif takım olabilir. Önce başka bir takımı pasif yapın.`]);
+        }
+        return errors;
+      }
+
+      /* ---------- Modal aç / kapat ---------- */
+      let lastFocus = null;
+      function openModal(team) {
+        lastFocus = document.activeElement;
+        els.form.reset();
+        clearAllErrors();
+        f.id.value = '';
+        if (team) {
+          els.title.textContent = 'Takımı Düzenle';
+          ['id', 'name', 'code', 'city', 'region', 'stadium', 'capacity', 'founded', 'status'].forEach((k) => { f[k].value = team[k]; });
+          f.colorA.value = team.colorA;
+          f.colorB.value = team.colorB;
+        } else {
+          els.title.textContent = 'Yeni Takım Ekle';
+          f.status.value = activeCount() >= MAX_ACTIVE ? 'inactive' : 'active';
+        }
+        updatePreview();
+        updateStatusHint();
+        els.modal.showModal();
+        f.name.focus();
+      }
+      const closeModal = () => els.modal.close();
+      els.modal.addEventListener('close', () => { if (lastFocus) lastFocus.focus(); });
+      els.modal.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
+      document.querySelectorAll('[data-modal-close]').forEach((b) => b.addEventListener('click', closeModal));
+      $('[data-open-create]').addEventListener('click', () => openModal(null));
+
+      /* ---------- Kaydet ---------- */
+      els.form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearAllErrors();
+        const d = Object.fromEntries(new FormData(els.form).entries());
+        const errors = validate(d);
+        if (errors.length) {
+          errors.forEach(([n, msg]) => setError(n, msg));
+          els.alert.classList.add('is-visible');
+          const first = f[errors[0][0]] || f.colorA;
+          first.focus();
+          return;
+        }
+        const record = {
+          name: d.name.trim(),
+          code: d.code.trim().toUpperCase(),
+          city: d.city.trim(),
+          region: d.region,
+          stadium: d.stadium.trim(),
+          capacity: Number(d.capacity),
+          founded: Number(d.founded),
+          colorA: d.colorA.toUpperCase(),
+          colorB: d.colorB.toUpperCase(),
+          status: d.status
+        };
+        let savedId;
+        if (d.id) {
+          // API: PUT /api/admin/teams/{id}
+          savedId = Number(d.id);
+          teams = teams.map((t) => (t.id === savedId ? { ...t, ...record } : t));
+          toast('Takım başarıyla güncellendi.');
+        } else {
+          // API: POST /api/admin/teams
+          savedId = Math.max(0, ...teams.map((t) => t.id)) + 1;
+          teams.push({ id: savedId, ...record });
+          toast('Takım başarıyla eklendi.');
+        }
+        closeModal();
+        renderAll(savedId);
+        const row = els.rows.querySelector(`[data-id="${savedId}"]`);
+        if (row) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        else toast('Kayıt mevcut filtreler nedeniyle gizli.', 'info');
+      });
+
+      /* ---------- Düzenle / Sil ---------- */
+      let pendingDelete = null;
+      els.rows.addEventListener('click', (e) => {
+        const edit = e.target.closest('[data-edit]');
+        const del = e.target.closest('[data-delete]');
+        if (edit) openModal(teams.find((t) => t.id === Number(edit.dataset.edit)));
+        if (del) {
+          const t = teams.find((x) => x.id === Number(del.dataset.delete));
+          pendingDelete = t.id;
+          const warn = t.status === 'active'
+            ? ' Takım şu anda Serie A\'da aktif; silinirse fikstür ve puan durumundaki kayıtları da etkilenir.'
+            : '';
+          els.delText.innerHTML = `<strong>${esc(t.name)}</strong> (${esc(t.code)}) kalıcı olarak silinecek.${warn} Bu işlem geri alınamaz.`;
+          els.del.returnValue = '';
+          els.del.showModal();
+        }
+      });
+      els.del.addEventListener('close', () => {
+        if (els.del.returnValue === 'confirm' && pendingDelete !== null) {
+          // API: DELETE /api/admin/teams/{id}
+          teams = teams.filter((t) => t.id !== pendingDelete);
+          renderAll();
+          toast('Takım silindi.');
+        }
+        pendingDelete = null;
+      });
+
+      /* ---------- Toast ---------- */
+      function toast(message, type = 'success') {
+        const el = document.createElement('div');
+        el.className = `toast-a toast-a--${type}`;
+        el.setAttribute('role', 'status');
+        el.innerHTML = `${icon(type === 'success' ? 'check' : 'info')}<span>${esc(message)}</span>`;
+        els.toasts.appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+      }
+
+      /* ---------- Sidebar (mobil) ---------- */
+      const toggleBtn = $('[data-sidebar-toggle]');
+      function setSidebar(open) {
+        document.body.classList.toggle('sidebar-open', open);
+        toggleBtn.setAttribute('aria-expanded', String(open));
+      }
+      toggleBtn.addEventListener('click', () => setSidebar(!document.body.classList.contains('sidebar-open')));
+      $('[data-sidebar-close]').addEventListener('click', () => setSidebar(false));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setSidebar(false); });
+
+      /* Demo: diğer sayfalar bu dosyada yok */
+      document.addEventListener('click', (e) => {
+        const nav = e.target.closest('[data-demo-nav], [data-demo-action]');
+        if (!nav) return;
+        e.preventDefault();
+        toast('Demo modunda yalnızca Takım Yönetimi ekranı açık.', 'info');
+      });
+
+      renderAll();
+    })();
+  </script>
+</body>
+</html>

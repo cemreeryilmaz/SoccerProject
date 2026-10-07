@@ -1,0 +1,46 @@
+@using System.Globalization
+@model FixtureListDto
+@{
+    var tr = new CultureInfo("tr-TR");
+    string homeName = Model.HomeTeam?.TeamName ?? $"#{Model.HomeTeamId}";
+    string awayName = Model.AwayTeam?.TeamName ?? $"#{Model.AwayTeamId}";
+    bool hasScore = Model.MatchStatus == MatchStatus.Finished || Model.MatchStatus == MatchStatus.InProgress;
+    string statusClass = Model.MatchStatus switch
+    {
+        MatchStatus.InProgress => "Live",
+        MatchStatus.Finished => "Finished",
+        _ => "NotStarted"
+    };
+    string statusText = Model.MatchStatus switch
+    {
+        MatchStatus.InProgress => "Canlı",
+        MatchStatus.Finished => "Tamamlandı",
+        _ => "Başlamadı"
+    };
+}
+<tr>
+    <td class="col-id">@Model.FixtureId</td>
+    <td class="week-cell">@Model.WeekNumber. Hafta</td>
+    <td>@Model.MatchDate.ToString("dd.MM.yyyy", tr)</td>
+    <td>@Model.MatchDate.ToString("HH:mm", tr)</td>
+    <td><span class="team"><span class="team-crest" style="@TeamVisual.Style(homeName)" aria-hidden="true"></span>@homeName</span></td>
+    <td class="col-score">
+        @if (hasScore)
+        {
+            <span class="score">@Model.HomeTeamScore - @Model.AwayTeamScore</span>
+        }
+        else
+        {
+            <span class="score score--empty">-</span>
+        }
+    </td>
+    <td><span class="team"><span class="team-crest" style="@TeamVisual.Style(awayName)" aria-hidden="true"></span>@awayName</span></td>
+    <td><span class="badge-a badge-a--@statusClass">@statusText</span></td>
+    <td class="col-actions">
+        <div class="row-actions">
+            <a class="act-btn" href="/Match/Detail/@Model.FixtureId" title="Detay" aria-label="Detay"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg></a>
+            <a class="act-btn" href="/Match/UpdateMatch/@Model.FixtureId" title="Düzenle" aria-label="Düzenle"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg></a>
+            <a class="act-btn act-btn--danger" href="/Match/DeleteMatch/@Model.FixtureId" title="Sil" aria-label="Sil" onclick="return confirm('@homeName - @awayName maçı silinsin mi?');"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></a>
+        </div>
+    </td>
+</tr>

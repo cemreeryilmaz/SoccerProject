@@ -1,0 +1,24 @@
+@model ResultTeamDto
+<tr>
+    <td class="col-id">@Model.TeamId</td>
+    <td>
+        <div class="team-cell">
+            <span class="team-crest" style="@TeamVisual.Style(Model.TeamName)" aria-hidden="true">@TeamVisual.Code(Model.TeamName)</span>
+            <div>
+                <span class="team-name">@Model.TeamName</span>
+                <span class="team-code">@TeamVisual.Code(Model.TeamName)</span>
+            </div>
+        </div>
+    </td>
+    <td>
+        <span class="swatches" title="Arma renkleri"><span class="swatch" style="--c:@TeamVisual.ColorA(Model.TeamName)"></span><span class="swatch" style="--c:@TeamVisual.ColorB(Model.TeamName)"></span></span>
+    </td>
+    <td class="logo-cell" title="@Model.LogoUrl">@(string.IsNullOrWhiteSpace(Model.LogoUrl) ? "-" : Model.LogoUrl)</td>
+    <td><span class="badge-a badge-a--active">Aktif</span></td>
+    <td class="col-actions">
+        <div class="row-actions">
+            <a class="act-btn" href="/Team/UpdateTeam/@Model.TeamId" title="Düzenle" aria-label="Düzenle: @Model.TeamName"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg></a>
+            <a class="act-btn act-btn--danger" href="/Team/DeleteTeam/@Model.TeamId" title="Sil" aria-label="Sil: @Model.TeamName" onclick="return confirm('@Model.TeamName silinsin mi?');"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></a>
+        </div>
+    </td>
+</tr>

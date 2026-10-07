@@ -1,0 +1,72 @@
+@model CreateStadiumDto
+@{
+    Layout = null;
+    ViewData["Title"] = "Yeni Stadyum Ekle";
+    ViewData["ActiveNav"] = "stadiums";
+    ViewData["AdminTitle"] = "Yeni Stadyum Ekle";
+    ViewData["AdminCrumb"] = "Yönetim / Stadyumlar / Yeni";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+</head>
+<body class="admin">
+    <partial name="_AdminIcons" />
+    <partial name="_AdminSidebar" />
+
+    <div class="admin-main">
+        <partial name="_AdminTopbar" />
+
+        <main class="admin-content">
+            <div class="page-head">
+                <div>
+                    <span class="page-eyebrow">Serie A 2026/27</span>
+                    <h1 class="page-title">Yeni Stadyum Ekle</h1>
+                    <p class="page-desc">Sisteme yeni bir stadyum ekleyin.</p>
+                </div>
+                <a class="btn-a btn-a--secondary" href="/Stadium">
+                    <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Listeye Dön
+                </a>
+            </div>
+
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger" role="alert" style="margin-bottom:16px;">@ViewBag.ErrorMessage</div>
+            }
+
+            <section class="card-a form-card" aria-label="Stadyum formu">
+                <form asp-action="CreateStadium" asp-controller="Stadium" method="post">
+                    <div class="form-card__body">
+                        <div class="form-grid">
+                            <div class="form-field span-2">
+                                <label class="field-label" for="Name">Stadyum Adı <span class="req">*</span></label>
+                                <input class="input-a" id="Name" name="Name" type="text" maxlength="80" placeholder="Örn. San Siro" autocomplete="off" required value="@Model?.Name">
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="City">Şehir <span class="req">*</span></label>
+                                <input class="input-a" id="City" name="City" type="text" maxlength="60" placeholder="Örn. Milano" autocomplete="off" required value="@Model?.City">
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="Capacity">Kapasite</label>
+                                <input class="input-a" id="Capacity" name="Capacity" type="number" min="0" max="120000" value="@(Model?.Capacity ?? 0)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-foot">
+                        <a class="btn-a btn-a--secondary" href="/Stadium">Vazgeç</a>
+                        <button type="submit" class="btn-a btn-a--primary"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Kaydet</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <partial name="_AdminScript" />
+</body>
+</html>

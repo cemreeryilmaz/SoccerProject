@@ -1,0 +1,92 @@
+@model CreateTeamDto
+@{
+    Layout = null;
+    ViewData["Title"] = "Yeni Takım Ekle";
+    ViewData["ActiveNav"] = "teams";
+    ViewData["AdminTitle"] = "Yeni Takım Ekle";
+    ViewData["AdminCrumb"] = "Yönetim / Takımlar / Yeni";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+</head>
+<body class="admin">
+    <partial name="_AdminIcons" />
+    <partial name="_AdminSidebar" />
+
+    <div class="admin-main">
+        <partial name="_AdminTopbar" />
+
+        <main class="admin-content">
+            <div class="page-head">
+                <div>
+                    <span class="page-eyebrow">Serie A 2026/27</span>
+                    <h1 class="page-title">Yeni Takım Ekle</h1>
+                    <p class="page-desc">Lige yeni bir kulüp ekleyin.</p>
+                </div>
+                <a class="btn-a btn-a--secondary" href="/Team">
+                    <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Listeye Dön
+                </a>
+            </div>
+
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger" role="alert" style="margin-bottom:16px;">@ViewBag.ErrorMessage</div>
+            }
+
+            <section class="card-a form-card" aria-label="Takım formu">
+                <form asp-action="CreateTeam" asp-controller="Team" method="post">
+                    <div class="form-card__body">
+                        <div class="crest-preview" aria-live="polite">
+                            <span class="team-crest team-crest--lg" id="preview-crest" aria-hidden="true">---</span>
+                            <div>
+                                <span class="crest-preview__name" id="preview-name">Takım adı</span>
+                                <span class="crest-preview__meta">Arma otomatik oluşturulur</span>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-field span-2">
+                                <label class="field-label" for="TeamName">Takım Adı <span class="req">*</span></label>
+                                <input class="input-a" id="TeamName" name="TeamName" type="text" maxlength="60" placeholder="Örn. Sampdoria" autocomplete="off" required value="@Model?.TeamName">
+                            </div>
+                            <div class="form-field span-2">
+                                <label class="field-label" for="LogoUrl">Logo URL</label>
+                                <input class="input-a" id="LogoUrl" name="LogoUrl" type="text" placeholder="Örn. /images/teams/sam.png" autocomplete="off" value="@Model?.LogoUrl">
+                                <p class="field-hint">Boş bırakılırsa arma renklerle otomatik çizilir.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-foot">
+                        <a class="btn-a btn-a--secondary" href="/Team">Vazgeç</a>
+                        <button type="submit" class="btn-a btn-a--primary"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Kaydet</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <partial name="_AdminScript" />
+    <script>
+        (function () {
+            var nameEl = document.getElementById('TeamName');
+            var crestEl = document.getElementById('preview-crest');
+            var nameOut = document.getElementById('preview-name');
+            function upd() {
+                var v = (nameEl.value || '').trim();
+                nameOut.textContent = v || 'Takım adı';
+                var code = v.toLocaleUpperCase('tr-TR').replace(/[^A-ZÇĞİÖŞÜ]/g, '').slice(0, 3);
+                crestEl.textContent = code || '---';
+            }
+            nameEl.addEventListener('input', upd);
+            upd();
+        })();
+    </script>
+</body>
+</html>

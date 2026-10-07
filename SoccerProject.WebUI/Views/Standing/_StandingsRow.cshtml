@@ -1,0 +1,45 @@
+@model StandingRowViewModel
+@{
+    string zoneClass = Model.Zone switch
+    {
+        "ucl" => "zone-ucl",
+        "europe" => "zone-europe",
+        "rel" => "zone-rel",
+        _ => ""
+    };
+    string gdClass = Model.GoalDifference > 0 ? "is-pos" : (Model.GoalDifference < 0 ? "is-neg" : "is-zero");
+    string gdText = Model.GoalDifference > 0 ? $"+{Model.GoalDifference}" : Model.GoalDifference.ToString();
+}
+<tr class="standings-row @zoneClass">
+    <td class="col-pos">@Model.Position</td>
+    <th scope="row" class="col-team">
+        <div class="team-cell">
+            <span class="team-crest" style="@TeamVisual.Style(Model.TeamName)" aria-hidden="true">@TeamVisual.Code(Model.TeamName)</span>
+            <span class="team-name">@Model.TeamName</span>
+        </div>
+    </th>
+    <td class="col-num">@Model.Played</td>
+    <td class="col-num">@Model.Won</td>
+    <td class="col-num">@Model.Drawn</td>
+    <td class="col-num">@Model.Lost</td>
+    <td class="col-num col-hide-sm">@Model.GoalsFor</td>
+    <td class="col-num col-hide-sm">@Model.GoalsAgainst</td>
+    <td class="col-gd"><span class="gd @gdClass">@gdText</span></td>
+    <td class="col-pts">@Model.Points</td>
+    <td class="col-form">
+        <ol class="form-list">
+            @if (!Model.Form.Any())
+            {
+                <li><span class="form-badge">-</span></li>
+            }
+            else
+            {
+                @foreach (var r in Model.Form)
+                {
+                    string cls = r == "G" ? "form-badge--w" : (r == "M" ? "form-badge--l" : "form-badge--d");
+                    <li><span class="form-badge @cls">@r</span></li>
+                }
+            }
+        </ol>
+    </td>
+</tr>

@@ -1,0 +1,84 @@
+@model List<ResultStadiumDto>
+@{
+    Layout = null;
+    ViewData["Title"] = "Stadyum Yönetimi";
+    ViewData["ActiveNav"] = "stadiums";
+    ViewData["AdminTitle"] = "Stadyum Yönetimi";
+    ViewData["AdminCrumb"] = "Yönetim / Stadyumlar";
+    var stadiums = Model ?? new List<ResultStadiumDto>();
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+</head>
+<body class="admin">
+    <partial name="_AdminIcons" />
+    <partial name="_AdminSidebar" />
+
+    <div class="admin-main">
+        <partial name="_AdminTopbar" />
+
+        <main class="admin-content">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger" role="alert" style="margin-bottom:16px;">@TempData["ErrorMessage"]</div>
+            }
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success" role="alert" style="margin-bottom:16px;">@TempData["SuccessMessage"]</div>
+            }
+            <div class="page-head">
+                <div>
+                    <span class="page-eyebrow">Serie A 2026/27</span>
+                    <h1 class="page-title">Stadyum Yönetimi</h1>
+                    <p class="page-desc">Stadyumları görüntüleyebilir, ekleyebilir, düzenleyebilir ve silebilirsiniz.</p>
+                </div>
+                <a class="btn-a btn-a--primary" href="/Stadium/CreateStadium">
+                    <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Yeni Stadyum Ekle
+                </a>
+            </div>
+
+            <section class="card-a" aria-label="Stadyum listesi">
+                <div class="table-scroll">
+                    <table class="team-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="col-id">ID</th>
+                                <th scope="col">Stadyum</th>
+                                <th scope="col">Şehir</th>
+                                <th scope="col">Kapasite</th>
+                                <th scope="col" class="col-actions">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!stadiums.Any())
+                            {
+                                <tr class="table-empty"><td colspan="5"><strong>Stadyum bulunamadı</strong>Yeni Stadyum Ekle ile ilk stadyumu oluşturun.</td></tr>
+                            }
+                            else
+                            {
+                                @foreach (var s in stadiums)
+                                {
+                                    <partial name="_StadiumRow" model="s" />
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-foot">
+                    <span>Toplam @stadiums.Count stadyum</span>
+                    <span>Kaynak: SoccerProject.WebAPI</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <partial name="_AdminScript" />
+</body>
+</html>

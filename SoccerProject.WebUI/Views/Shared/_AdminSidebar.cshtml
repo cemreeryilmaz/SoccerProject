@@ -1,0 +1,24 @@
+@{
+    string active = ViewData["ActiveNav"] as string ?? "";
+    string Cls(string key) => active == key ? "sidebar-link is-active" : "sidebar-link";
+}
+<aside class="admin-sidebar" id="admin-sidebar" aria-label="Yönetim menüsü">
+    <a class="sidebar-brand" href="/">
+        <span class="brand-mark" aria-hidden="true">SA</span>
+        <span class="brand-text">Serie A Admin</span>
+    </a>
+    <p class="sidebar-label">Yönetim</p>
+    <ul class="sidebar-nav">
+        <li><a class="@Cls("home")" href="/"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>Ana Sayfa</a></li>
+        <li><a class="@Cls("matches")" href="/Match"><svg class="icon" aria-hidden="true"><use href="#i-ball"/></svg>Maçlar</a></li>
+        <li><a class="@Cls("teams")" href="/Team"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>Takımlar</a></li>
+        <li><a class="@Cls("players")" href="/Player"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Futbolcular</a></li>
+        <li><a class="@Cls("stadiums")" href="/Stadium"><svg class="icon" aria-hidden="true"><use href="#i-stadium"/></svg>Stadyumlar</a></li>
+        <li><a class="@Cls("weeks")" href="/Fixture"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Fikstür</a></li>
+        <li><a class="@Cls("standings")" href="/Standing"><svg class="icon" aria-hidden="true"><use href="#i-table"/></svg>Puan Durumu</a></li>
+    </ul>
+    <div class="sidebar-foot">
+        <span class="sidebar-season">Sezon 2026/27</span>
+    </div>
+</aside>
+<div class="sidebar-backdrop" data-sidebar-close></div>

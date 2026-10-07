@@ -1,0 +1,69 @@
+@model ResultFixtureDto
+@{
+    string statusClass = Model.Status switch
+    {
+        MatchStatus.Finished => "Finished",
+        MatchStatus.InProgress => "Live",
+        _ => "NotStarted"
+    };
+    string statusLabel = Model.Status switch
+    {
+        MatchStatus.Finished => "Maç bitti",
+        MatchStatus.InProgress => "Canlı",
+        _ => "Başlamadı"
+    };
+    bool hasScore = Model.Status == MatchStatus.Finished || Model.Status == MatchStatus.InProgress;
+    bool linked = hasScore;
+
+    string homeCls = "", awayCls = "";
+    if (Model.Status == MatchStatus.Finished && Model.HomeTeamScore != Model.AwayTeamScore)
+    {
+        bool homeWon = Model.HomeTeamScore > Model.AwayTeamScore;
+        homeCls = homeWon ? "is-winner" : "is-loser";
+        awayCls = homeWon ? "is-loser" : "is-winner";
+    }
+}
+<li>
+    <article class="fixture-card fixture-card--@statusClass@(linked ? " is-linked" : "")" data-match-id="@Model.FixtureId">
+        <div class="fx-meta">
+            <time class="fx-time">@Model.MatchDate.ToString("HH:mm")</time>
+            <span class="status status--@statusClass">@statusLabel</span>
+        </div>
+
+        <div class="fx-team fx-team--home @homeCls">
+            <span class="fx-name">@Model.HomeTeamName</span>
+            <span class="team-crest" style="@TeamVisual.Style(Model.HomeTeamName)" aria-hidden="true">@TeamVisual.Code(Model.HomeTeamName)</span>
+        </div>
+
+        @if (hasScore)
+        {
+            <div class="fx-score" aria-label="Skor @Model.HomeTeamScore-@Model.AwayTeamScore">
+                <span>@Model.HomeTeamScore</span><span class="fx-score__sep" aria-hidden="true"></span><span>@Model.AwayTeamScore</span>
+            </div>
+        }
+        else
+        {
+            <div class="fx-score fx-score--empty" aria-label="Skor yok">-</div>
+        }
+
+        <div class="fx-team fx-team--away @awayCls">
+            <span class="team-crest" style="@TeamVisual.Style(Model.AwayTeamName)" aria-hidden="true">@TeamVisual.Code(Model.AwayTeamName)</span>
+            <span class="fx-name">@Model.AwayTeamName</span>
+        </div>
+
+        <div class="fx-action">
+            @if (Model.Status == MatchStatus.Finished)
+            {
+                <a class="fx-link" href="/Match/Detail/@Model.FixtureId">Maç detayı</a>
+            }
+            else if (Model.Status == MatchStatus.InProgress)
+            {
+                <a class="fx-link" href="/Match/Detail/@Model.FixtureId">Canlı takip</a>
+            }
+            else
+            {
+                <span>@Model.Stadium</span>
+            }
+        </div>
+    </article>
+</li>

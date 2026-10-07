@@ -1,0 +1,201 @@
+/* =============================================================
+   Serie A Admin - admin.css (Takım + Maç panelleri ortak)
+   ============================================================= */
+
+/* 1. Tokens */
+:root {
+    --navy-900:#081530; --navy-800:#0B1B3A; --navy-700:#13284F; --navy-600:#1C3563;
+    --blue:#1E5BD8; --blue-hover:#174BB6; --blue-soft:#E8EFFD; --blue-line:#BFD2F7;
+    --it-green:#009246; --it-white:#F4F5F0; --it-red:#CE2B37;
+    --it-green-soft:#E2F4EA; --it-red-soft:#FBE8EA;
+    --tricolore:linear-gradient(90deg,var(--it-green) 0 33.33%,var(--it-white) 33.33% 66.66%,var(--it-red) 66.66% 100%);
+    --tricolore-light:linear-gradient(90deg,var(--it-green) 0 33.33%,#D9DCD3 33.33% 66.66%,var(--it-red) 66.66% 100%);
+    --bg:#F2F5F9; --white:#FFFFFF; --line:#E1E7F0; --line-strong:#CCD5E3; --row-hover:#F7F9FC;
+    --text:#0F1B33; --text-2:#33425E; --muted:#5B6B86; --dim:#8A97AD;
+    --green:#0E9F6E; --green-soft:#E3F6EE; --amber:#B7791F; --amber-soft:#FDF3DC; --red:#D23B4E; --red-soft:#FCE9EC;
+    --radius:10px; --radius-sm:7px; --sidebar-w:clamp(220px,18vw,264px); --topbar-h:60px;
+    --font-body:"Barlow","Segoe UI",system-ui,sans-serif;
+    --font-display:"Barlow Condensed","Arial Narrow",sans-serif;
+}
+
+/* 2. Base + layout */
+body.admin { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-body); font-size:15px; line-height:1.45; font-variant-numeric:tabular-nums; }
+a { text-decoration:none; }
+.icon { width:18px; height:18px; flex:none; }
+.visually-hidden { position:absolute !important; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.admin-main { margin-left:var(--sidebar-w); min-height:100vh; }
+.admin-content { padding:26px 28px 48px; }
+
+/* 3. Sidebar */
+.admin-sidebar { position:fixed; inset:0 auto 0 0; z-index:40; display:flex; flex-direction:column; width:var(--sidebar-w); background:var(--navy-800); color:#C9D4EA;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 300' fill='none' stroke='white' stroke-opacity='.05' stroke-width='2'%3E%3Crect x='20' y='20' width='220' height='320' rx='2'/%3E%3Cpath d='M20 170h220'/%3E%3Ccircle cx='130' cy='170' r='46'/%3E%3Ccircle cx='130' cy='170' r='3' fill='white' fill-opacity='.05'/%3E%3Crect x='75' y='20' width='110' height='52'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:center bottom -40px; background-size:100% auto; }
+.admin-sidebar::before { content:""; position:absolute; top:0; left:0; right:0; height:4px; background:var(--tricolore); }
+.sidebar-brand { display:flex; align-items:center; gap:10px; height:var(--topbar-h); padding:0 20px; border-bottom:1px solid rgba(255,255,255,.07); color:#fff; }
+.brand-mark { position:relative; overflow:hidden; display:grid; place-items:center; width:30px; height:30px; border-radius:8px; background:var(--blue); font-family:var(--font-display); font-size:.95rem; font-weight:700; }
+.brand-mark::after { content:""; position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--tricolore); }
+.brand-text { font-family:var(--font-display); font-size:1.3rem; font-weight:700; letter-spacing:.01em; }
+.sidebar-label { margin:20px 20px 8px; color:#7F8EAE; font-size:.75rem; font-weight:600; }
+.sidebar-nav { margin:0; padding:0 10px; list-style:none; }
+.sidebar-link { position:relative; display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:8px; color:#C9D4EA; font-weight:500; transition:background-color .12s ease,color .12s ease; }
+.sidebar-link .icon { color:#8D9CBC; }
+.sidebar-link:hover { background:var(--navy-700); color:#fff; }
+.sidebar-link:hover .icon { color:#fff; }
+.sidebar-link.is-active { background:rgba(30,91,216,.28); color:#fff; font-weight:600; }
+.sidebar-link.is-active .icon { color:#8FB4FF; }
+.sidebar-link.is-active::before { content:""; position:absolute; top:8px; bottom:8px; left:-10px; width:3px; border-radius:0 3px 3px 0; background:#4F86F7; }
+.sidebar-foot { margin-top:auto; padding:10px 10px 14px; border-top:1px solid rgba(255,255,255,.07); }
+.sidebar-season { display:block; padding:4px 12px 10px; color:#7F8EAE; font-size:.8rem; }
+.sidebar-link--logout:hover { background:rgba(206,43,55,.2); color:#FFD5DB; }
+.sidebar-link--logout:hover .icon { color:#FF9AA8; }
+.sidebar-backdrop { display:none; }
+
+/* 4. Topbar */
+.admin-topbar { position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between; gap:12px; height:var(--topbar-h); padding:0 28px; background:var(--white); }
+.admin-topbar::after { content:""; position:absolute; left:0; right:0; bottom:0; height:2px; background:var(--tricolore-light); }
+.topbar-left { display:flex; align-items:center; gap:12px; min-width:0; }
+.topbar-title { margin:0; font-size:1rem; font-weight:600; }
+.topbar-crumb { color:var(--dim); font-size:.85rem; }
+.topbar-right { display:flex; align-items:center; gap:8px; }
+.icon-btn { position:relative; display:grid; place-items:center; width:36px; height:36px; border:1px solid transparent; border-radius:8px; background:transparent; color:var(--muted); cursor:pointer; }
+.icon-btn:hover { background:var(--bg); color:var(--text); }
+.notif-dot { position:absolute; top:8px; right:9px; width:7px; height:7px; border:2px solid var(--white); border-radius:50%; background:var(--it-red); box-sizing:content-box; }
+.menu-toggle { display:none; }
+.topbar-user { display:flex; align-items:center; gap:10px; margin-left:6px; padding:4px 10px 4px 14px; border-left:1px solid var(--line); }
+.avatar { display:grid; place-items:center; width:32px; height:32px; border-radius:50%; background:var(--blue-soft); color:var(--blue); }
+.topbar-user__name { font-weight:600; font-size:.9rem; line-height:1.1; }
+.topbar-user__role { display:block; color:var(--dim); font-size:.75rem; }
+
+/* 5. Sayfa başlığı + butonlar */
+.page-eyebrow { display:flex; align-items:center; gap:10px; margin-bottom:6px; color:var(--muted); font-size:.8rem; font-weight:600; }
+.page-eyebrow::before { content:""; width:30px; height:4px; border-radius:2px; background:var(--tricolore-light); }
+.page-head { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:20px; }
+.page-title { margin:0; font-family:var(--font-display); font-size:2rem; font-weight:700; line-height:1.1; }
+.page-desc { margin:4px 0 0; color:var(--muted); }
+.btn-a { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:38px; padding:0 16px; border:1px solid transparent; border-radius:8px; font:inherit; font-size:.9rem; font-weight:600; white-space:nowrap; cursor:pointer; transition:background-color .12s ease,border-color .12s ease; }
+.btn-a .icon { width:16px; height:16px; }
+.btn-a--primary { background:var(--blue); color:#fff; }
+.btn-a--primary:hover { background:var(--blue-hover); }
+.btn-a--secondary { border-color:var(--line-strong); background:var(--white); color:var(--text-2); }
+.btn-a--secondary:hover { background:var(--bg); }
+.btn-a--ghost { background:transparent; color:var(--muted); padding:0 10px; }
+.btn-a--ghost:hover { color:var(--text); background:var(--bg); }
+.btn-a--danger { background:var(--it-red); color:#fff; }
+.btn-a--danger:hover { background:#B02430; }
+
+/* 6. Lig şeridi */
+.league-strip { display:grid; grid-template-columns:repeat(4,1fr); margin-bottom:18px; border:1px solid var(--line); border-radius:var(--radius); background:var(--white); }
+.strip-item { display:flex; align-items:center; gap:12px; padding:12px 16px; }
+.strip-item + .strip-item { border-left:1px solid var(--line); }
+.strip-icon { display:grid; place-items:center; width:34px; height:34px; border-radius:8px; background:var(--tint); color:var(--ink); }
+.strip-icon .icon { width:17px; height:17px; }
+.strip-item--green { --tint:var(--it-green-soft); --ink:var(--it-green); }
+.strip-item--blue { --tint:var(--blue-soft); --ink:var(--blue); }
+.strip-item--red { --tint:var(--it-red-soft); --ink:var(--it-red); }
+.strip-item--navy { --tint:#E6EAF2; --ink:var(--navy-700); }
+.strip-label { display:block; color:var(--muted); font-size:.78rem; font-weight:500; }
+.strip-value { display:block; font-family:var(--font-display); font-size:1.35rem; font-weight:700; line-height:1.1; }
+.strip-value small { color:var(--muted); font-family:var(--font-body); font-size:.78rem; font-weight:500; }
+
+/* 7. Filtre + kart */
+.card-a { border:1px solid var(--line); border-radius:var(--radius); background:var(--white); }
+.filter-bar { display:grid; grid-template-columns:minmax(200px,1.6fr) minmax(150px,1fr) minmax(150px,1fr) auto; align-items:end; gap:12px; padding:14px 16px; border-bottom:1px solid var(--line); }
+.field-label { display:block; margin-bottom:5px; color:var(--text-2); font-size:.8rem; font-weight:600; }
+.input-a,.select-a { width:100%; height:38px; padding:0 12px; border:1px solid var(--line-strong); border-radius:var(--radius-sm); background:var(--white); color:var(--text); font:inherit; font-size:.9rem; }
+.select-a { appearance:none; padding-right:34px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235B6B86' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:16px; }
+.input-a::placeholder { color:var(--dim); }
+.input-a:focus,.select-a:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(30,91,216,.15); }
+.input-icon { position:relative; }
+.input-icon .icon { position:absolute; top:50%; left:11px; width:16px; height:16px; transform:translateY(-50%); color:var(--dim); pointer-events:none; }
+.input-icon .input-a { padding-left:34px; }
+.filter-actions { display:flex; gap:6px; }
+
+/* 8. Tablolar */
+.table-scroll { overflow-x:auto; }
+.team-table,.match-table { width:100%; border-collapse:collapse; }
+.team-table { min-width:760px; }
+.match-table { min-width:900px; }
+.team-table th,.match-table th { padding:10px 14px; border-bottom:1px solid var(--line); background:#F8FAFC; color:var(--muted); font-size:.78rem; font-weight:600; text-align:left; white-space:nowrap; }
+.team-table td,.match-table td { padding:9px 14px; border-bottom:1px solid var(--line); color:var(--text-2); vertical-align:middle; white-space:nowrap; }
+.team-table tbody tr:last-child td,.match-table tbody tr:last-child td { border-bottom:0; }
+.team-table tbody tr:hover td,.match-table tbody tr:hover td { background:var(--row-hover); }
+.col-id { width:64px; color:var(--muted); font-weight:600; }
+.col-num { text-align:right !important; }
+.col-score { text-align:center !important; width:84px; }
+.col-actions { width:1%; text-align:right !important; }
+.week-cell { color:var(--text-2); }
+
+.team-cell,.team { display:flex; align-items:center; gap:12px; }
+.team { display:inline-flex; gap:9px; color:var(--text); font-weight:600; }
+.team-crest { --size:34px; flex:none; display:inline-grid; place-items:center; width:var(--size); height:var(--size); border-radius:50%; background:linear-gradient(180deg,var(--crest-a) 0 70%,var(--crest-b) 70% 100%); color:var(--crest-ink,#fff); font-family:var(--font-display); font-size:calc(var(--size)*.33); font-weight:700; line-height:1; padding-bottom:calc(var(--size)*.12); box-shadow:inset 0 0 0 1px rgba(0,0,0,.14); }
+.team .team-crest { --size:22px; }
+.team-crest--lg { --size:64px; }
+.team-name { display:block; color:var(--text); font-weight:600; line-height:1.2; }
+.team-code { color:var(--dim); font-size:.78rem; font-weight:600; letter-spacing:.04em; }
+.score { display:inline-block; min-width:56px; padding:3px 8px; border-radius:6px; background:var(--bg); color:var(--text); font-weight:700; text-align:center; }
+.score--empty { background:transparent; color:var(--dim); font-weight:500; }
+.swatches { display:inline-flex; }
+.swatch { width:18px; height:18px; border:2px solid var(--white); border-radius:50%; background:var(--c); box-shadow:0 0 0 1px var(--line-strong); }
+.swatch + .swatch { margin-left:-6px; }
+.logo-cell { color:var(--dim); font-size:.82rem; max-width:280px; overflow:hidden; text-overflow:ellipsis; }
+
+.table-foot { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; padding:10px 16px; border-top:1px solid var(--line); color:var(--muted); font-size:.85rem; }
+.table-empty td { padding:40px 16px !important; text-align:center; color:var(--muted); white-space:normal !important; }
+.table-empty strong { display:block; margin-bottom:2px; color:var(--text); }
+
+/* 9. Rozetler + işlemler */
+.badge-a { display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:999px; font-size:.78rem; font-weight:600; }
+.badge-a--active { background:var(--it-green-soft); color:var(--it-green); }
+.badge-a--active::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--it-green); }
+.badge-a--inactive { background:#EDF0F5; color:var(--muted); }
+.badge-a--NotStarted { background:#EDF2F9; color:#4B5E80; }
+.badge-a--Live { background:var(--green-soft); color:var(--green); }
+.badge-a--Live::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--green); }
+.badge-a--Finished { background:#E3E9F4; color:var(--navy-700); }
+.row-actions { display:inline-flex; gap:4px; }
+.act-btn { display:grid; place-items:center; width:30px; height:30px; border:1px solid var(--line); border-radius:7px; background:var(--white); color:var(--muted); cursor:pointer; transition:background-color .12s ease,color .12s ease,border-color .12s ease; }
+.act-btn .icon { width:15px; height:15px; }
+.act-btn:hover { border-color:var(--blue-line); background:var(--blue-soft); color:var(--blue); }
+.act-btn--danger:hover { border-color:#F3C0C8; background:var(--it-red-soft); color:var(--it-red); }
+
+/* 10. Form sayfası (Create/Update) */
+.form-card { max-width:760px; }
+.form-card__body { padding:20px 22px 8px; }
+.form-card::before { content:""; display:block; height:4px; background:var(--tricolore); border-radius:var(--radius) var(--radius) 0 0; }
+.crest-preview { display:flex; align-items:center; gap:16px; margin-bottom:18px; padding:14px 16px; border:1px dashed var(--line-strong); border-radius:var(--radius); background:#FAFBFD; }
+.crest-preview__name { display:block; font-size:1.1rem; font-weight:700; line-height:1.2; }
+.crest-preview__meta { color:var(--muted); font-size:.85rem; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px 16px; }
+.form-grid .span-2 { grid-column:1 / -1; }
+.form-field { min-width:0; }
+.req { color:var(--it-red); }
+.field-hint { margin:4px 0 0; color:var(--dim); font-size:.78rem; }
+.field-error { margin:5px 0 0; color:var(--it-red); font-size:.8rem; font-weight:500; }
+.form-foot { display:flex; justify-content:flex-end; gap:8px; margin-top:8px; padding:16px 22px; border-top:1px solid var(--line); background:#F8FAFC; border-radius:0 0 var(--radius) var(--radius); }
+.score-fields { display:grid; grid-template-columns:1fr 1fr; gap:14px 16px; }
+
+/* 11. Responsive */
+@media (max-width: 1100px) {
+    .filter-bar { grid-template-columns:1fr 1fr; }
+    .filter-bar .filter-search { grid-column:1 / -1; }
+    .filter-actions { grid-column:1 / -1; justify-content:flex-end; }
+    .league-strip { grid-template-columns:1fr 1fr; }
+    .strip-item:nth-child(3) { border-left:0; }
+    .strip-item:nth-child(n+3) { border-top:1px solid var(--line); }
+}
+@media (max-width: 991.98px) {
+    .admin-main { margin-left:0; }
+    .admin-sidebar { width:260px; transform:translateX(-100%); transition:transform .2s ease; }
+    body.sidebar-open .admin-sidebar { transform:none; }
+    body.sidebar-open .sidebar-backdrop { display:block; position:fixed; inset:0; z-index:35; background:rgba(8,21,48,.45); }
+    .menu-toggle { display:grid; }
+    .admin-topbar { padding:0 16px; }
+    .admin-content { padding:20px 16px 40px; }
+    .topbar-crumb { display:none; }
+}
+@media (max-width: 575.98px) {
+    .filter-bar,.form-grid,.score-fields { grid-template-columns:1fr; }
+    .page-head .btn-a--primary { width:100%; }
+    .topbar-user__text { display:none; }
+    .strip-item { padding:10px 12px; }
+}

@@ -1,0 +1,25 @@
+@{
+    string title = ViewData["AdminTitle"] as string ?? "Yönetim";
+    string crumb = ViewData["AdminCrumb"] as string ?? "";
+}
+<header class="admin-topbar">
+    <div class="topbar-left">
+        <button type="button" class="icon-btn menu-toggle" data-sidebar-toggle aria-controls="admin-sidebar" aria-expanded="false" aria-label="Menüyü aç">
+            <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+        </button>
+        <p class="topbar-title">@title</p>
+        @if (!string.IsNullOrEmpty(crumb))
+        {
+            <span class="topbar-crumb">@crumb</span>
+        }
+    </div>
+    <div class="topbar-right">
+        <button type="button" class="icon-btn" aria-label="Bildirimler">
+            <svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span class="notif-dot"></span>
+        </button>
+        <div class="topbar-user">
+            <span class="avatar"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></span>
+            <span class="topbar-user__text"><span class="topbar-user__name">Yönetici</span><span class="topbar-user__role">Tam yetkili</span></span>
+        </div>
+    </div>
+</header>

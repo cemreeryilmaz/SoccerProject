@@ -1,0 +1,126 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Serie A Merkezi";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <style>
+        :root {
+            --bg:#070F1F; --surface:#0F1D38; --surface-2:#142647; --line:#1F3358;
+            --text:#E9F0FB; --text-2:#C4D0E6; --muted:#8B9CC0; --dim:#6A7DA3;
+            --blue:#2E7BFF; --blue-bright:#5B9BFF; --green:#1FC98A; --amber:#F2B53B; --red:#F2475C;
+            --radius-lg:20px; --radius-md:14px;
+            --font-display:"Barlow Condensed","Arial Narrow",sans-serif;
+            --font-body:"Barlow","Segoe UI",system-ui,sans-serif;
+        }
+        body.home-page { min-height:100vh; margin:0; background-color:var(--bg);
+            background-image:radial-gradient(1100px 520px at 50% -12%, rgba(46,123,255,.22), transparent 62%);
+            background-repeat:no-repeat; color:var(--text); font-family:var(--font-body); }
+        a { text-decoration:none; color:inherit; }
+        .home-shell { padding-block:48px 72px; }
+        .hero { position:relative; overflow:hidden; padding:44px 40px; border:1px solid var(--line); border-radius:var(--radius-lg);
+            background:linear-gradient(160deg,#112552 0%,#0B1834 55%,#09142A 100%); text-align:center; }
+        .hero::after { content:""; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,var(--blue),var(--blue-bright) 30%,transparent 75%); }
+        .hero-league { display:inline-flex; align-items:center; gap:10px; margin-bottom:12px; color:var(--muted); font-weight:500; }
+        .league-mark { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:linear-gradient(145deg,var(--blue-bright),var(--blue)); color:#fff; font-family:var(--font-display); font-weight:700; }
+        .hero h1 { margin:0; font-family:var(--font-display); font-size:clamp(2.8rem,6vw,4.6rem); font-weight:700; line-height:.95; }
+        .hero p { max-width:60ch; margin:14px auto 0; color:var(--muted); }
+        .nav-grid { margin-top:26px; }
+        .nav-card { display:flex; flex-direction:column; gap:8px; height:100%; padding:24px 22px; border:1px solid var(--line); border-radius:var(--radius-md);
+            background:var(--surface); transition:border-color .15s ease, transform .15s ease, background .15s ease; }
+        .nav-card:hover { border-color:var(--blue); transform:translateY(-3px); background:var(--surface-2); }
+        .nav-card__icon { display:grid; place-items:center; width:46px; height:46px; border-radius:12px; background:var(--tint,rgba(46,123,255,.15)); color:var(--ink,var(--blue-bright)); font-size:1.5rem; margin-bottom:6px; }
+        .nav-card h2 { margin:0; font-family:var(--font-display); font-size:1.5rem; font-weight:600; }
+        .nav-card p { margin:0; color:var(--muted); font-size:.92rem; }
+        .nav-card__cta { margin-top:auto; padding-top:10px; color:var(--blue-bright); font-weight:600; font-size:.9rem; }
+        .section-label { margin:34px 0 14px; color:var(--dim); font-size:.8rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    </style>
+</head>
+<body class="home-page">
+    <main class="home-shell container-xl">
+        <header class="hero">
+            <div class="hero-league"><span class="league-mark" aria-hidden="true">SA</span>İtalya, Serie A · 2026/27</div>
+            <h1>Serie A Merkezi</h1>
+            <p>Haftalık fikstür, güncel puan durumu ve detaylı maç sonuçları. Yönetim panelinden takım ve maç kayıtlarını düzenleyin.</p>
+        </header>
+
+        <p class="section-label">Herkese açık</p>
+        <div class="row g-3 nav-grid">
+            <div class="col-md-4">
+                <a class="nav-card" href="/Fixture">
+                    <span class="nav-card__icon" style="--tint:rgba(46,123,255,.15);--ink:var(--blue-bright)">🗓️</span>
+                    <h2>Haftalık Fikstür</h2>
+                    <p>Hafta hafta karşılaşmalar, günlere göre gruplanmış maçlar ve form durumu.</p>
+                    <span class="nav-card__cta">Fikstürü gör →</span>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="nav-card" href="/Standing">
+                    <span class="nav-card__icon" style="--tint:rgba(31,201,138,.15);--ink:var(--green)">📊</span>
+                    <h2>Puan Durumu</h2>
+                    <p>Biten maçlardan hesaplanan sıralama, averaj ve son 5 maçlık form.</p>
+                    <span class="nav-card__cta">Puan durumu →</span>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="nav-card" href="/Match">
+                    <span class="nav-card__icon" style="--tint:rgba(242,181,59,.15);--ink:var(--amber)">⚽</span>
+                    <h2>Maç Sonuçları</h2>
+                    <p>Maç listesinden bir karşılaşma seçip olay akışı ve istatistikleri inceleyin.</p>
+                    <span class="nav-card__cta">Maçlara git →</span>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="nav-card" href="/Players">
+                    <span class="nav-card__icon" style="--tint:rgba(91,155,255,.15);--ink:var(--blue-bright)">👤</span>
+                    <h2>Futbolcular</h2>
+                    <p>Takımların kadroları; oyuncu fotoğrafı, yaşı, uyruğu ve kariyer geçmişi.</p>
+                    <span class="nav-card__cta">Futbolculara git →</span>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="nav-card" href="/Stadiums">
+                    <span class="nav-card__icon" style="--tint:rgba(31,201,138,.15);--ink:var(--green)">🏟️</span>
+                    <h2>Stadyumlar</h2>
+                    <p>Serie A stadyumları; şehir, kapasite ve orada oynanan maçlar.</p>
+                    <span class="nav-card__cta">Stadyumlara git →</span>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="nav-card" href="/Players/TopScorers">
+                    <span class="nav-card__icon" style="--tint:rgba(245,197,66,.15);--ink:var(--amber)">👑</span>
+                    <h2>Gol Krallığı</h2>
+                    <p>Futbolcuların attığı gollerin toplamıyla oluşan krallık sıralaması.</p>
+                    <span class="nav-card__cta">Gol krallığı →</span>
+                </a>
+            </div>
+        </div>
+
+        <p class="section-label">Yönetim paneli</p>
+        <div class="row g-3 nav-grid">
+            <div class="col-md-6">
+                <a class="nav-card" href="/Team">
+                    <span class="nav-card__icon" style="--tint:rgba(91,155,255,.15);--ink:var(--blue-bright)">🛡️</span>
+                    <h2>Takım Yönetimi</h2>
+                    <p>Serie A kulüplerini ekleyin, düzenleyin ve silin.</p>
+                    <span class="nav-card__cta">Takımları yönet →</span>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a class="nav-card" href="/Match">
+                    <span class="nav-card__icon" style="--tint:rgba(242,71,92,.15);--ink:var(--red)">🗂️</span>
+                    <h2>Maç Yönetimi</h2>
+                    <p>Karşılaşmaları oluşturun, skor ve durum bilgilerini güncelleyin.</p>
+                    <span class="nav-card__cta">Maçları yönet →</span>
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

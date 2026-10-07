@@ -1,0 +1,102 @@
+@model UpdatePlayerDto
+@{
+    Layout = null;
+    ViewData["Title"] = "Futbolcuyu Düzenle";
+    ViewData["ActiveNav"] = "players";
+    ViewData["AdminTitle"] = "Futbolcuyu Düzenle";
+    ViewData["AdminCrumb"] = "Yönetim / Futbolcular / Düzenle";
+    var teams = ViewBag.Teams as List<ResultTeamDto> ?? new List<ResultTeamDto>();
+    var positions = new[] { "Kaleci", "Defans", "Orta Saha", "Forvet" };
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] | Serie A Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+</head>
+<body class="admin">
+    <partial name="_AdminIcons" />
+    <partial name="_AdminSidebar" />
+
+    <div class="admin-main">
+        <partial name="_AdminTopbar" />
+
+        <main class="admin-content">
+            <div class="page-head">
+                <div>
+                    <span class="page-eyebrow">Serie A 2026/27</span>
+                    <h1 class="page-title">Futbolcuyu Düzenle</h1>
+                    <p class="page-desc">@Model.FullName bilgilerini güncelleyin.</p>
+                </div>
+                <a class="btn-a btn-a--secondary" href="/Player">
+                    <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Listeye Dön
+                </a>
+            </div>
+
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger" role="alert" style="margin-bottom:16px;">@ViewBag.ErrorMessage</div>
+            }
+
+            <section class="card-a form-card" aria-label="Futbolcu formu">
+                <form asp-action="UpdatePlayer" asp-controller="Player" method="post">
+                    <input type="hidden" name="PlayerId" value="@Model.PlayerId" />
+                    <div class="form-card__body">
+                        <div class="form-grid">
+                            <div class="form-field span-2">
+                                <label class="field-label" for="FullName">Ad Soyad <span class="req">*</span></label>
+                                <input class="input-a" id="FullName" name="FullName" type="text" maxlength="80" autocomplete="off" required value="@Model.FullName">
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="TeamId">Takım <span class="req">*</span></label>
+                                <select class="select-a" id="TeamId" name="TeamId" required>
+                                    <option value="">Takım seçin</option>
+                                    @foreach (var t in teams)
+                                    {
+                                        <option value="@t.TeamId" selected="@(Model.TeamId == t.TeamId)">@t.TeamName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="ShirtNumber">Forma No</label>
+                                <input class="input-a" id="ShirtNumber" name="ShirtNumber" type="number" min="1" max="99" value="@Model.ShirtNumber">
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="Position">Mevki</label>
+                                <select class="select-a" id="Position" name="Position">
+                                    @foreach (var p in positions)
+                                    {
+                                        <option value="@p" selected="@(Model.Position == p)">@p</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="Nationality">Uyruk</label>
+                                <input class="input-a" id="Nationality" name="Nationality" type="text" maxlength="40" autocomplete="off" value="@Model.Nationality">
+                            </div>
+                            <div class="form-field">
+                                <label class="field-label" for="BirthDate">Doğum tarihi</label>
+                                <input class="input-a" id="BirthDate" name="BirthDate" type="date" value="@(Model.BirthDate?.ToString("yyyy-MM-dd"))">
+                            </div>
+                            <div class="form-field span-2">
+                                <label class="field-label" for="PhotoUrl">Fotoğraf (URL)</label>
+                                <input class="input-a" id="PhotoUrl" name="PhotoUrl" type="url" autocomplete="off" value="@Model.PhotoUrl">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-foot">
+                        <a class="btn-a btn-a--secondary" href="/Player">Vazgeç</a>
+                        <button type="submit" class="btn-a btn-a--primary"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Güncelle</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <partial name="_AdminScript" />
+</body>
+</html>
